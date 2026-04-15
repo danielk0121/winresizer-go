@@ -216,25 +216,22 @@ function isModified(name) {
     const cur = config.shortcuts?.[name];
     const ini = initialConfig.shortcuts?.[name];
     if (!cur || !ini) return false;
-    
-    // pynput 비교 (단축키 삭제 포함)
-    if (cur.pynput !== ini.pynput) return true;
-    
+
+    // keycode/modifiers 비교
+    if (cur.keycode !== ini.keycode || cur.modifiers !== ini.modifiers) return true;
+
     // 커스텀 비율 모드인 경우 비율 비교
     if (CUSTOM_KEYS.includes(name)) {
         const pctId = CUSTOM_PCT_IDS[name];
         const inputEl = document.getElementById(pctId);
         if (!inputEl) return false;
-
         const curPct = inputEl.value;
         const mode = ini.mode || '';
         const match = mode.match(/_custom:(\d+)$/);
         const iniPct = match ? match[1] : '';
-        
-        // 문자열로 비교하여 타입 차이로 인한 이슈 방지
         if (String(curPct) !== String(iniPct)) return true;
     }
-    
+
     return false;
 }
 
@@ -251,7 +248,7 @@ function renderHotkeys() {
     for (const name of HOTKEY_ORDER) {
         const info = shortcuts[name];
         if (!info) continue;
-        const display = info.pynput ? info.display : t('hotkeyDefault');
+        const display = info.keycode ? info.display : t('hotkeyDefault');
         const row = document.createElement('div');
         row.className = 'row' + (isModified(name) ? ' modified' : '');
         row.id = 'row-' + name;
@@ -276,7 +273,7 @@ function renderCustomHotkeys() {
 
         const btn = document.getElementById('btn-' + name);
         if (btn && !btn.classList.contains('recording')) {
-            btn.textContent = info.pynput ? info.display : t('hotkeyDefault');
+            btn.textContent = info.keycode ? info.display : t('hotkeyDefault');
         }
     }
 }
@@ -307,48 +304,68 @@ function stopRecording() {
     renderCustomHotkeys();
 }
 
+// ── Carbon keycode 변환 맵 (브라우저 e.code → macOS Virtual Key Code) ──
+// https://developer.apple.com/documentation/carbon/1805242-virtual_key_codes
+const KEYCODE_MAP = {
+    'KeyA':0,'KeyS':1,'KeyD':2,'KeyF':3,'KeyH':4,'KeyG':5,'KeyZ':6,'KeyX':7,
+    'KeyC':8,'KeyV':9,'KeyB':11,'KeyQ':12,'KeyW':13,'KeyE':14,'KeyR':15,
+    'KeyY':16,'KeyT':17,'Digit1':18,'Digit2':19,'Digit3':20,'Digit4':21,
+    'Digit6':22,'Digit5':23,'Equal':24,'Digit9':25,'Digit7':26,'Minus':27,
+    'Digit8':28,'Digit0':29,'BracketRight':30,'KeyO':31,'KeyU':32,
+    'BracketLeft':33,'KeyI':34,'KeyP':35,'Enter':36,'KeyL':37,'KeyJ':38,
+    'Quote':39,'KeyK':40,'Semicolon':41,'Backslash':42,'Comma':43,'Slash':44,
+    'KeyN':45,'KeyM':46,'Period':47,'Tab':48,'Space':49,'Backquote':50,
+    'Backspace':51,'Escape':53,'ArrowLeft':123,'ArrowRight':124,
+    'ArrowDown':125,'ArrowUp':126,'F1':122,'F2':120,'F3':99,'F4':118,
+    'F5':96,'F6':97,'F7':98,'F8':100,'F9':101,'F10':109,'F11':103,'F12':111,
+};
+
+// Carbon modifier 비트 플래그
+const MOD_SHIFT   = 1 << 9;  // shiftKey
+const MOD_CTRL    = 1 << 12; // ctrlKey
+const MOD_OPT     = 1 << 11; // altKey (Option)
+const MOD_CMD     = 1 << 8;  // metaKey (Command)
+
 document.addEventListener('keydown', (e) => {
     if (!recordingKey) return;
     e.preventDefault();
 
+    // Backspace/Delete: 단축키 삭제
     if (e.key === 'Backspace' || e.key === 'Delete') {
-        config.shortcuts[recordingKey].pynput = '';
-        config.shortcuts[recordingKey].display = '';
+        config.shortcuts[recordingKey].keycode   = 0;
+        config.shortcuts[recordingKey].modifiers = 0;
+        config.shortcuts[recordingKey].display   = '';
         stopRecording();
         return;
     }
 
+    // 수식키만 눌린 경우 무시
     if (['Control', 'Alt', 'Meta', 'Shift'].includes(e.key)) return;
 
-    // 브라우저 e.key → pynput 키 이름 변환 맵
-    const KEY_MAP = {
-        'arrowleft':  'left',
-        'arrowright': 'right',
-        'arrowup':    'up',
-        'arrowdown':  'down',
-        'enter':      'enter',
-        'escape':     'esc',
-        'tab':        'tab',
-        'space':      'space',
-        ' ':          'space',
-    };
+    const keycode = KEYCODE_MAP[e.code];
+    if (keycode === undefined) return; // 미지원 키 무시
 
+    // 수식키 조합 (최소 1개 이상 필요)
+    if (!e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey) return;
+
+    let modifiers = 0;
+    if (e.ctrlKey)  modifiers |= MOD_CTRL;
+    if (e.altKey)   modifiers |= MOD_OPT;
+    if (e.metaKey)  modifiers |= MOD_CMD;
+    if (e.shiftKey) modifiers |= MOD_SHIFT;
+
+    // 사람이 읽기 좋은 표시용 문자열
     const parts = [];
-    if (e.ctrlKey)  parts.push('<ctrl>');
-    if (e.altKey)   parts.push('<alt>');
-    if (e.metaKey)  parts.push('<cmd>');
-    if (e.shiftKey) parts.push('<shift>');
+    if (e.ctrlKey)  parts.push('ctrl');
+    if (e.altKey)   parts.push('opt');
+    if (e.metaKey)  parts.push('cmd');
+    if (e.shiftKey) parts.push('shift');
+    parts.push(e.key.length === 1 ? e.key.toUpperCase() : e.key);
+    const display = parts.join(' + ');
 
-    const rawKey = e.key.toLowerCase();
-    const mappedKey = KEY_MAP[rawKey] || rawKey;
-    const key = mappedKey.length === 1 ? mappedKey : `<${mappedKey}>`;
-    parts.push(key);
-
-    const pynput = parts.join('+');
-    const display = pynput.replace(/[<>]/g, '').replace(/\+/g, ' + ');
-
-    config.shortcuts[recordingKey].pynput = pynput;
-    config.shortcuts[recordingKey].display = display;
+    config.shortcuts[recordingKey].keycode   = keycode;
+    config.shortcuts[recordingKey].modifiers = modifiers;
+    config.shortcuts[recordingKey].display   = display;
     stopRecording();
 });
 
@@ -370,16 +387,26 @@ function getTimeString() {
     return `[${iso}]\n`;
 }
 
+function deleteHotkey(name) {
+    if (!config.shortcuts[name]) return;
+    config.shortcuts[name].keycode   = 0;
+    config.shortcuts[name].modifiers = 0;
+    config.shortcuts[name].display   = '';
+    renderHotkeys();
+    renderCustomHotkeys();
+}
+
 function clearAll() {
     if (!confirm(t('confirmClear'))) return;
     for (const name of Object.keys(config.shortcuts || {})) {
-        config.shortcuts[name].pynput = '';
-        config.shortcuts[name].display = '';
+        config.shortcuts[name].keycode   = 0;
+        config.shortcuts[name].modifiers = 0;
+        config.shortcuts[name].display   = '';
     }
     renderHotkeys();
     renderCustomHotkeys();
     renderGap();
-    
+
     const status = document.getElementById('status');
     status.style.color = '#f39c12';
     status.textContent = getTimeString() + t('clearDone');
@@ -406,15 +433,15 @@ async function saveConfig() {
         }
     }
 
-    // 중복 단축키 검사
-    const pynputToNames = {};
+    // 중복 단축키 검사 (keycode + modifiers 조합 기준)
+    const keyCombToNames = {};
     for (const [name, info] of Object.entries(config.shortcuts || {})) {
-        const pk = info.pynput;
-        if (!pk) continue;
-        if (!pynputToNames[pk]) pynputToNames[pk] = [];
-        pynputToNames[pk].push(name);
+        if (!info.keycode) continue;
+        const key = `${info.keycode}:${info.modifiers}`;
+        if (!keyCombToNames[key]) keyCombToNames[key] = [];
+        keyCombToNames[key].push(name);
     }
-    const conflicts = Object.values(pynputToNames).filter(names => names.length > 1);
+    const conflicts = Object.values(keyCombToNames).filter(names => names.length > 1);
     if (conflicts.length > 0) {
         const conflictDesc = conflicts.map(names => names.map(hotkeyLabel).join(' ↔ ')).join(', ');
         status.style.color = '#e74c3c';
@@ -472,56 +499,26 @@ loadConfig();
 // ── 상태 체크 ──────────────────────────────────────────────────
 async function checkStatus() {
     const badge = document.getElementById('status-badge');
-    const guide = document.getElementById('guide-overlay');
-    const mainBtn = document.getElementById('guide-main-btn');
     if (!badge) return;
+
+    // [개발 모드] 권한 가이드 오버레이 비활성화 — 권한 테스트 전 개발용
+    const guide = document.getElementById('guide-overlay');
+    if (guide) guide.style.display = 'none';
 
     try {
         const res = await fetch('/api/status');
         const data = await res.json();
-        
         const acc = data.accessibility_granted;
         const inp = data.input_monitoring_granted;
 
-        // 1단계: 손쉬운 사용
-        const step1 = document.getElementById('step1');
-        if (step1) step1.classList.toggle('completed', acc);
-
-        // 2단계: 입력 모니터링
-        const step2 = document.getElementById('step2');
-        if (step2) step2.classList.toggle('completed', inp);
-
-        // 3단계: 앱 재실행 (두 권한 모두 있고 앱이 떠있으면 안내)
-        const step3 = document.getElementById('step3');
-        if (step3) {
-            if (acc && inp) {
-                step3.style.fontWeight = 'bold';
-                step3.style.color = '#2ecc71';
-            } else {
-                step3.style.fontWeight = 'normal';
-                step3.style.color = '#ccc';
-            }
-        }
-
-        // 전체 배지 업데이트
         if (acc && inp) {
             badge.className = 'status-badge status-granted';
-            badge.innerHTML = `<span data-i18n="statusGranted">${t('statusGranted')}</span>`;
+            badge.innerHTML = `<span>${t('statusGranted')}</span>`;
             badge.onclick = null;
-            if (guide) guide.style.display = 'none';
         } else {
             badge.className = 'status-badge status-denied';
             const statusKey = (acc || inp) ? 'statusPartial' : 'statusDenied';
-            badge.innerHTML = `<span data-i18n="${statusKey}">${t(statusKey)}</span>`;
-            
-            badge.onclick = !acc ? openAccessibilitySettings : openInputMonitoring;
-            
-            if (guide) {
-                guide.style.display = 'flex';
-                if (mainBtn) {
-                    mainBtn.onclick = !acc ? openAccessibilitySettings : openInputMonitoring;
-                }
-            }
+            badge.innerHTML = `<span>${t(statusKey)}</span>`;
         }
     } catch (e) {
         console.error('Status check failed:', e);
@@ -529,41 +526,21 @@ async function checkStatus() {
 }
 
 async function openAccessibilitySettings() {
-    console.log('Requesting to open accessibility settings...');
-    try {
-        const res = await fetch('/api/execute', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ mode: 'open_accessibility' })
-        });
-        if (res.ok) {
-            console.log('Accessibility settings request successful');
-        } else {
-            console.error('Failed to open accessibility settings:', await res.text());
-        }
-    } catch (e) {
-        console.error('Error calling /api/execute:', e);
-    }
+    await fetch('/api/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'open_accessibility' })
+    });
 }
 
 async function openInputMonitoring() {
-    console.log('Requesting to open input monitoring settings...');
-    try {
-        const res = await fetch('/api/execute', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ mode: 'open_input_monitoring' })
-        });
-        if (res.ok) {
-            console.log('Input monitoring settings request successful');
-        } else {
-            console.error('Failed to open input monitoring settings:', await res.text());
-        }
-    } catch (e) {
-        console.error('Error calling /api/execute:', e);
-    }
+    await fetch('/api/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'open_input_monitoring' })
+    });
 }
 
 // 5초마다 권한 상태 체크
 setInterval(checkStatus, 5000);
-setTimeout(checkStatus, 500); // 로드 직후 한 번 실행
+setTimeout(checkStatus, 500);

@@ -12,8 +12,12 @@ import (
 // webPort: gin 웹서버 포트, onQuit: 앱 종료 콜백
 func OnReady(webPort int, onQuit func()) func() {
 	return func() {
-		// 트레이 아이콘 설정
-		systray.SetTitle("WinResizer")
+		// 트레이 아이콘 설정 (embed된 PNG 사용)
+		if iconData, err := Assets.ReadFile("tray_icon.png"); err == nil {
+			systray.SetIcon(iconData)
+		} else {
+			utils.Log.Warnf("트레이 아이콘 로드 실패: %v", err)
+		}
 		systray.SetTooltip("WinResizer — 창 크기 조절기")
 
 		// 메뉴 구성

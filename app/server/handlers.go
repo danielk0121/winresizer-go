@@ -1,18 +1,25 @@
 package server
 
 import (
+	"html/template"
+	"io/fs"
 	"net/http"
 	"os"
 	"winresizer/core"
+	"winresizer/ui"
 	"winresizer/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 func registerRoutes(r *gin.Engine) {
-	// 정적 파일 — embed 패키지로 바이너리에 내장
-	r.Static("/static", "./ui/static")
-	r.LoadHTMLGlob("./ui/templates/*")
+	// 정적 파일 (embed)
+	staticFS, _ := fs.Sub(ui.Assets, "static")
+	r.StaticFS("/static", http.FS(staticFS))
+
+	// HTML 템플릿 (embed)
+	tmpl := template.Must(template.ParseFS(ui.Assets, "templates/*.html"))
+	r.SetHTMLTemplate(tmpl)
 
 	r.GET("/", handleIndex)
 
@@ -35,9 +42,9 @@ func handleIndex(c *gin.Context) {
 // GET /api/status
 func handleGetStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"accessibility_granted":   core.CheckAccessibilityPermission(),
+		"accessibility_granted":    core.CheckAccessibilityPermission(),
 		"input_monitoring_granted": core.CheckInputMonitoringPermission(),
-		"pid":                     os.Getpid(),
+		"pid":                      os.Getpid(),
 	})
 }
 
@@ -62,7 +69,6 @@ func handlePostConfig(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	// 설정 변경 후 단축키 리스너 재시작
 	go core.RestartHotkeyManager()
 	utils.Log.Infof("설정 저장 완료")
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
