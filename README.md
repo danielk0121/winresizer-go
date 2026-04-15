@@ -60,6 +60,50 @@ winresizer-go/
 - `app/server/web_server.go`: 사용자가 단축키 및 일반 설정을 변경할 수 있는 HTTP 서버를 관리합니다.
 - `app/ui/tray.go`: macOS 메뉴바의 아이콘 표시 및 클릭 시 브라우저 호출 로직을 담당합니다.
 
+## Go 개발 참고
+
+### 테스트 파일 위치
+Go는 별도 `tests/` 폴더를 만들지 않습니다. 테스트 파일은 소스 파일과 **같은 폴더**에 `_test.go` 접미사로 작성합니다.
+
+```
+core/
+├── window_controller.go
+├── window_controller_test.go   ← 테스트 파일
+├── hotkey_listener.go
+└── hotkey_listener_test.go     ← 테스트 파일
+```
+
+```bash
+# 특정 패키지 테스트
+go test ./core/...
+
+# 전체 테스트
+go test ./...
+```
+
+## 설정 파일 구조 (default-config.json vs config.json)
+
+파이썬 구현체와 동일하게 **2개 파일** 구조를 사용합니다.
+
+| 파일 | 위치 | 역할 |
+|---|---|---|
+| `default-config.json` | `app/config/default-config.json` (소스 내장) | 앱 기본값 정의. 소스코드에 포함되어 배포됨 |
+| `config.json` | `~/Library/Application Support/WinResizer/config.json` | 사용자 실제 설정. 런타임에 생성/수정됨 |
+
+**동작 흐름:**
+
+```text
+앱 시작
+  └─ config.json 존재?
+       ├─ YES → config.json 로드 (사용자 설정 사용)
+       └─ NO  → default-config.json 로드 → config.json으로 복사 생성
+```
+
+- `default-config.json`은 읽기 전용 기준값입니다. 앱이 직접 수정하지 않습니다.
+- 사용자가 설정 UI에서 변경하면 `config.json`에만 저장됩니다.
+- `POST /api/config/reset` 호출 시 `default-config.json` 값을 응답으로 반환하지만, `config.json` 파일은 덮어쓰지 않습니다 (설계 의도).
+- 관련 구현: `app/core/config_manager.go` — `LoadConfig()`, `LoadDefaultConfig()`
+
 ## 실행 중 프로세스 구성
 
 WinResizer는 효율적인 동시성 처리를 위해 3개의 주요 고루틴으로 운영됩니다.
