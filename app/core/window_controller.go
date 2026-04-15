@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 	"sync"
+	"sync/atomic"
 	"winresizer/utils"
 )
 
@@ -12,6 +13,9 @@ var (
 	windowStateStore = map[int]Rect{} // key: PID
 	windowStateMu    sync.Mutex
 )
+
+// commandRunning은 ExecuteWindowCommand 실행 중 중복 호출을 방지하는 플래그입니다.
+var commandRunning atomic.Bool
 
 // HotkeyManager는 설정 기반으로 단축키를 등록/관리합니다.
 type HotkeyManager struct {
@@ -91,6 +95,13 @@ func (hm *HotkeyManager) restart() {
 
 // ExecuteWindowCommand는 지정된 모드로 활성 창을 조절합니다.
 func ExecuteWindowCommand(mode string) error {
+	// 이전 명령 처리 중이면 드롭 (연속 입력 시 중복 실행 방지)
+	if !commandRunning.CompareAndSwap(false, true) {
+		utils.Log.Debugf("명령 처리 중 — 드롭: %s", mode)
+		return nil
+	}
+	defer commandRunning.Store(false)
+
 	// 특수 명령: 권한 설정 화면 열기
 	switch mode {
 	case "open_accessibility":
