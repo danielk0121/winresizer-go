@@ -183,6 +183,13 @@ function hotkeyLabel(name) {
 // 사이즈 리사이클 단축키 목록
 const SIZE_RECYCLE_KEYS = ['Size Grow Left', 'Size Shrink Left', 'Size Grow Right', 'Size Shrink Right'];
 
+const SIZE_RECYCLE_MODE_MAP = {
+    'Size Grow Left':   'size_grow_left',
+    'Size Shrink Left': 'size_shrink_left',
+    'Size Grow Right':  'size_grow_right',
+    'Size Shrink Right':'size_shrink_right',
+};
+
 // 단축키 섹션 렌더링 순서
 const HOTKEY_ORDER = [
     'Left', 'Right', 'Top', 'Bottom',
@@ -211,10 +218,13 @@ function loadConfigUI() {
     // 1. 모든 DOM 값(input)들을 먼저 설정
     document.getElementById('gap').value = config.settings?.gap ?? 5;
 
-    // config에 사이즈 리사이클 단축키가 없으면 기본값으로 초기화
+    // config에 사이즈 리사이클 단축키가 없거나 mode가 비어 있으면 보정
     for (const name of SIZE_RECYCLE_KEYS) {
         if (!config.shortcuts[name]) {
-            config.shortcuts[name] = { display: '', mode: '', keycode: 0, modifiers: 0 };
+            config.shortcuts[name] = { display: '', mode: SIZE_RECYCLE_MODE_MAP[name], keycode: 0, modifiers: 0 };
+        } else {
+            // mode가 빈 문자열인 경우 올바른 mode로 보정 (마이그레이션 대응)
+            config.shortcuts[name].mode = SIZE_RECYCLE_MODE_MAP[name];
         }
     }
 

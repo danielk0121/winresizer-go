@@ -53,8 +53,8 @@ func (hm *HotkeyManager) start() {
 	// 단축키 등록
 	id := 1
 	for name, sc := range cfg.Shortcuts {
-		if sc.Keycode == 0 {
-			continue // 미설정 단축키 스킵
+		if sc.Keycode == 0 || sc.Mode == "" {
+			continue // 미설정 또는 mode 누락 단축키 스킵
 		}
 		if RegisterHotkey(id, sc.Keycode, sc.Modifiers) {
 			hm.idMap[id] = sc.Mode
