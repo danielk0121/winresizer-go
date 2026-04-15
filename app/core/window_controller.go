@@ -177,8 +177,12 @@ func ExecuteWindowCommand(mode string) error {
 		H: targetRelative.H,
 	}
 
-	// 이미 해당 위치에 있으면 다음 모니터로 이동
+	// 이미 해당 위치에 있으면 스마트 사이클 시도, 사이클 없으면 다음 모니터로 이동
 	if isAlreadyAligned(currentFrame, targetAbs, mode, targetMonitor) {
+		if cycled := nextCycleMode(mode); cycled != "" {
+			utils.Log.Debugf("스마트 사이클: %s → %s", mode, cycled)
+			return ExecuteWindowCommand(cycled)
+		}
 		return moveToNextDisplay(pid, currentFrame, monitors, targetMonitor)
 	}
 
@@ -300,6 +304,32 @@ func moveToNextDisplay(pid int, current Rect, monitors []Monitor, currentMonitor
 
 func openSystemPrefs(url string) error {
 	return exec.Command("open", url).Run()
+}
+
+// cycleMap은 스마트 사이클 순서를 정의합니다.
+// left/right: 1/2 → 1/3 → 2/3 → 1/2 순환
+// 상하/쿼터/maximize 등: 사이클 없음 (다음 모니터로 이동)
+var cycleMap = map[string]string{
+	"left_half": "left_1/3",
+	"left_1/3":  "left_2/3",
+	"left_2/3":  "left_half",
+	"right_half": "right_1/3",
+	"right_1/3":  "right_2/3",
+	"right_2/3":  "right_half",
+}
+
+// nextCycleMode는 현재 모드의 다음 사이클 모드를 반환합니다.
+// 사이클이 없으면 빈 문자열을 반환합니다.
+func nextCycleMode(mode string) string {
+	next, ok := cycleMap[mode]
+	if !ok {
+		return ""
+	}
+	// 자기 자신을 가리키면 사이클 없음
+	if next == mode {
+		return ""
+	}
+	return next
 }
 
 func contains(s, sub string) bool {

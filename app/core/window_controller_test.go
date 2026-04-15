@@ -65,6 +65,53 @@ func TestReanchor_LeftMode_NoChange(t *testing.T) {
 	}
 }
 
+// --- nextCycleMode 테스트 ---
+
+func TestNextCycleMode_LeftCycle(t *testing.T) {
+	tests := []struct {
+		input string
+		want  string
+	}{
+		{"left_half", "left_1/3"},
+		{"left_1/3", "left_2/3"},
+		{"left_2/3", "left_half"},
+	}
+	for _, tt := range tests {
+		got := nextCycleMode(tt.input)
+		if got != tt.want {
+			t.Errorf("nextCycleMode(%q) = %q, want %q", tt.input, got, tt.want)
+		}
+	}
+}
+
+func TestNextCycleMode_RightCycle(t *testing.T) {
+	tests := []struct {
+		input string
+		want  string
+	}{
+		{"right_half", "right_1/3"},
+		{"right_1/3", "right_2/3"},
+		{"right_2/3", "right_half"},
+	}
+	for _, tt := range tests {
+		got := nextCycleMode(tt.input)
+		if got != tt.want {
+			t.Errorf("nextCycleMode(%q) = %q, want %q", tt.input, got, tt.want)
+		}
+	}
+}
+
+func TestNextCycleMode_NoCycle(t *testing.T) {
+	// 사이클 없는 모드는 빈 문자열 반환
+	modes := []string{"top_half", "bottom_half", "maximize", "restore", "top_left_1/4", "left_custom:60"}
+	for _, mode := range modes {
+		got := nextCycleMode(mode)
+		if got != "" {
+			t.Errorf("nextCycleMode(%q) = %q, want \"\"", mode, got)
+		}
+	}
+}
+
 // --- isAlreadyAligned 테스트 ---
 
 func TestIsAlreadyAligned_ExactMatch(t *testing.T) {
