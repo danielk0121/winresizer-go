@@ -48,8 +48,11 @@ var (
 	cacheMu     sync.RWMutex
 )
 
-// defaultConfigPath는 번들 내 기본 설정 파일 경로를 반환합니다.
-func defaultConfigPath() string {
+// defaultConfigPathFn은 번들 내 기본 설정 파일 경로를 반환합니다.
+// 테스트에서 교체 가능합니다.
+var defaultConfigPathFn = resolveDefaultConfigPath
+
+func resolveDefaultConfigPath() string {
 	// 실행 파일 기준 상대 경로로 탐색
 	exe, err := os.Executable()
 	if err == nil {
@@ -60,6 +63,11 @@ func defaultConfigPath() string {
 	}
 	// 개발 환경: 소스 기준 경로
 	return filepath.Join("config", "default-config.json")
+}
+
+// defaultConfigPath는 번들 내 기본 설정 파일 경로를 반환합니다.
+func defaultConfigPath() string {
+	return defaultConfigPathFn()
 }
 
 // LoadDefaultConfig는 default-config.json을 읽어 반환합니다.
@@ -112,7 +120,8 @@ func LoadConfig() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := SaveConfig(cfg); err != nil {
+	// 락을 잡은 상태에서 호출하므로 파일만 저장 (캐시 갱신 제외)
+	if err := saveConfigFile(cfg); err != nil {
 		utils.Log.Errorf("초기 설정 저장 실패: %v", err)
 	}
 	configCache = cfg
@@ -124,8 +133,8 @@ func GetConfig() (*Config, error) {
 	return LoadConfig()
 }
 
-// SaveConfig는 설정을 config.json에 저장합니다.
-func SaveConfig(cfg *Config) error {
+// saveConfigFile은 캐시 갱신 없이 파일만 저장합니다 (내부용).
+func saveConfigFile(cfg *Config) error {
 	if err := ensureConfigDir(); err != nil {
 		return fmt.Errorf("설정 디렉토리 생성 실패: %w", err)
 	}
@@ -136,11 +145,19 @@ func SaveConfig(cfg *Config) error {
 	if err := os.WriteFile(configFilePath, data, 0644); err != nil {
 		return fmt.Errorf("설정 파일 저장 실패: %w", err)
 	}
+	utils.Log.Debugf("설정 파일 저장 완료: %s", configFilePath)
+	return nil
+}
+
+// SaveConfig는 설정을 config.json에 저장합니다.
+func SaveConfig(cfg *Config) error {
+	if err := saveConfigFile(cfg); err != nil {
+		return err
+	}
 	// 캐시 갱신
 	cacheMu.Lock()
 	configCache = cfg
 	cacheMu.Unlock()
-	utils.Log.Debugf("설정 파일 저장 완료: %s", configFilePath)
 	return nil
 }
 
