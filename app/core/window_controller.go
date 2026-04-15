@@ -327,31 +327,38 @@ func isSizeRecycleMode(mode string) bool {
 	return false
 }
 
+// sizeRecycleMinRatio는 사이즈 리사이클 최솟값 비율입니다.
+const sizeRecycleMinRatio = 0.20
+
+// sizeRecycleMaxRatio는 사이즈 리사이클 최댓값 비율입니다.
+const sizeRecycleMaxRatio = 0.90
+
 // executeSizeRecycle은 현재 창 폭을 기준으로 10% 증감합니다.
 // left 계열: 좌측 엣지(x) 고정, 우측으로 확장/축소
 // right 계열: 우측 엣지 고정, 좌측으로 확장/축소
+// 최솟값(20%) 도달 시 최댓값(90%)으로, 최댓값(90%) 도달 시 최솟값(20%)으로 순환합니다.
 func executeSizeRecycle(pid int, current Rect, monitor Monitor, mode string, gap float64) error {
 	screenW := float64(monitor.Width)
 	screenH := float64(monitor.Height)
 	step := screenW * 0.10 // 10% 스텝
 
-	minW := screenW * 0.10
-	maxW := screenW - gap*2
+	minW := screenW*sizeRecycleMinRatio - gap*2
+	maxW := screenW*sizeRecycleMaxRatio - gap*2
 
 	newW := current.W
 	switch mode {
 	case "size_grow_left", "size_grow_right":
 		newW = current.W + step
+		// 최댓값 초과 시 최솟값으로 순환
+		if newW > maxW+step*0.5 {
+			newW = minW
+		}
 	case "size_shrink_left", "size_shrink_right":
 		newW = current.W - step
-	}
-
-	// 범위 클램핑
-	if newW < minW {
-		newW = minW
-	}
-	if newW > maxW {
-		newW = maxW
+		// 최솟값 미만 시 최댓값으로 순환
+		if newW < minW-step*0.5 {
+			newW = maxW
+		}
 	}
 
 	newH := screenH - gap*2

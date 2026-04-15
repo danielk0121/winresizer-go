@@ -211,21 +211,21 @@ func calcSizeRecycle(current Rect, monitor Monitor, mode string, gap float64) Re
 	screenH := float64(monitor.Height)
 	step := screenW * 0.10
 
-	minW := screenW * 0.10
-	maxW := screenW - gap*2
+	minW := screenW*sizeRecycleMinRatio - gap*2
+	maxW := screenW*sizeRecycleMaxRatio - gap*2
 
 	newW := current.W
 	switch mode {
 	case "size_grow_left", "size_grow_right":
 		newW = current.W + step
+		if newW > maxW+step*0.5 {
+			newW = minW
+		}
 	case "size_shrink_left", "size_shrink_right":
 		newW = current.W - step
-	}
-	if newW < minW {
-		newW = minW
-	}
-	if newW > maxW {
-		newW = maxW
+		if newW < minW-step*0.5 {
+			newW = maxW
+		}
 	}
 
 	newH := screenH - gap*2
@@ -246,6 +246,7 @@ func calcSizeRecycle(current Rect, monitor Monitor, mode string, gap float64) Re
 }
 
 func TestSizeRecycle_GrowLeft(t *testing.T) {
+	// 중간 값(50%)에서 확장 → 60%
 	monitor := Monitor{X: 0, Y: 0, Width: 2000, Height: 2000}
 	current := Rect{X: 0, Y: 0, W: 1000, H: 2000} // 50%
 	got := calcSizeRecycle(current, monitor, "size_grow_left", 0)
@@ -259,6 +260,7 @@ func TestSizeRecycle_GrowLeft(t *testing.T) {
 }
 
 func TestSizeRecycle_ShrinkLeft(t *testing.T) {
+	// 중간 값(50%)에서 축소 → 40%
 	monitor := Monitor{X: 0, Y: 0, Width: 2000, Height: 2000}
 	current := Rect{X: 0, Y: 0, W: 1000, H: 2000}
 	got := calcSizeRecycle(current, monitor, "size_shrink_left", 0)
@@ -272,8 +274,9 @@ func TestSizeRecycle_ShrinkLeft(t *testing.T) {
 }
 
 func TestSizeRecycle_GrowRight(t *testing.T) {
+	// 중간 값(50%)에서 확장 → 60%, 우측 엣지 고정
 	monitor := Monitor{X: 0, Y: 0, Width: 2000, Height: 2000}
-	current := Rect{X: 1000, Y: 0, W: 1000, H: 2000} // 우측 50%
+	current := Rect{X: 1000, Y: 0, W: 1000, H: 2000}
 	got := calcSizeRecycle(current, monitor, "size_grow_right", 0)
 
 	// 새 폭 = 1000+200 = 1200, 우측 엣지 고정 → x = 2000-1200 = 800
@@ -286,6 +289,7 @@ func TestSizeRecycle_GrowRight(t *testing.T) {
 }
 
 func TestSizeRecycle_ShrinkRight(t *testing.T) {
+	// 중간 값(50%)에서 축소 → 40%, 우측 엣지 고정
 	monitor := Monitor{X: 0, Y: 0, Width: 2000, Height: 2000}
 	current := Rect{X: 1000, Y: 0, W: 1000, H: 2000}
 	got := calcSizeRecycle(current, monitor, "size_shrink_right", 0)
@@ -299,27 +303,29 @@ func TestSizeRecycle_ShrinkRight(t *testing.T) {
 	}
 }
 
-func TestSizeRecycle_MinClamp(t *testing.T) {
-	// 최소 10% 이하로 줄어들지 않는지 확인
+func TestSizeRecycle_GrowWrapsToMin(t *testing.T) {
+	// 최댓값(90%)에서 확장 → 최솟값(20%)으로 순환
 	monitor := Monitor{X: 0, Y: 0, Width: 2000, Height: 2000}
-	current := Rect{X: 0, Y: 0, W: 200, H: 2000} // 정확히 10%
-	got := calcSizeRecycle(current, monitor, "size_shrink_left", 0)
+	maxW := 2000.0 * sizeRecycleMaxRatio // 1800
+	minW := 2000.0 * sizeRecycleMinRatio // 400
+	current := Rect{X: 0, Y: 0, W: maxW, H: 2000}
+	got := calcSizeRecycle(current, monitor, "size_grow_left", 0)
 
-	minW := 2000.0 * 0.10
-	if got.W < minW-1 {
-		t.Errorf("size_shrink_left 최소값 클램핑 실패: W=%.0f, minW=%.0f", got.W, minW)
+	if abs64(got.W-minW) > 1 {
+		t.Errorf("size_grow_left 최대→최소 순환 실패: W=%.0f, want %.0f", got.W, minW)
 	}
 }
 
-func TestSizeRecycle_MaxClamp(t *testing.T) {
-	// 최대 100%(gap 제외)를 초과하지 않는지 확인
+func TestSizeRecycle_ShrinkWrapsToMax(t *testing.T) {
+	// 최솟값(20%)에서 축소 → 최댓값(90%)으로 순환
 	monitor := Monitor{X: 0, Y: 0, Width: 2000, Height: 2000}
-	current := Rect{X: 0, Y: 0, W: 1950, H: 2000} // 97.5%
-	got := calcSizeRecycle(current, monitor, "size_grow_left", 0)
+	minW := 2000.0 * sizeRecycleMinRatio // 400
+	maxW := 2000.0 * sizeRecycleMaxRatio // 1800
+	current := Rect{X: 0, Y: 0, W: minW, H: 2000}
+	got := calcSizeRecycle(current, monitor, "size_shrink_left", 0)
 
-	maxW := 2000.0
-	if got.W > maxW+1 {
-		t.Errorf("size_grow_left 최대값 클램핑 실패: W=%.0f, maxW=%.0f", got.W, maxW)
+	if abs64(got.W-maxW) > 1 {
+		t.Errorf("size_shrink_left 최소→최대 순환 실패: W=%.0f, want %.0f", got.W, maxW)
 	}
 }
 

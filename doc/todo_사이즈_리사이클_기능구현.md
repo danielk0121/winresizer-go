@@ -37,3 +37,10 @@
 - `app/config/default-config.json`: `Size Grow Left`, `Size Shrink Left`, `Size Grow Right`, `Size Shrink Right` 4개 단축키 항목 추가
 - `app/ui/templates/index.html`: 사이즈 리사이클 섹션 UI 추가 (커스텀 비율 섹션과 단축키 섹션 사이)
 - `app/ui/static/app.js`: 사이즈 리사이클 렌더링 로직 및 i18n 문자열 추가
+
+## 추가 변경 (2026-04-16)
+- 최솟값 20%, 최댓값 90%로 범위 조정 (`sizeRecycleMinRatio = 0.20`, `sizeRecycleMaxRatio = 0.90`)
+- 경계 도달 시 랩어라운드(wrap-around) 동작:
+  - 확장(grow): 현재 폭이 최대(90%) 초과 시 → 최소(20%)로 점프
+  - 축소(shrink): 현재 폭이 최소(20%) 미만 시 → 최대(90%)로 점프
+- 단위 테스트 갱신: `TestSizeRecycle_GrowWrapsToMin`, `TestSizeRecycle_ShrinkWrapsToMax` 추가
