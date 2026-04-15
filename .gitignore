@@ -21,6 +21,7 @@ go.work.sum
 # Build output
 bin/
 dist/
+build-work/dist/
 
 # OS files
 .DS_Store
