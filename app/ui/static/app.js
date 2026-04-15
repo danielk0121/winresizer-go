@@ -501,10 +501,6 @@ async function checkStatus() {
     const badge = document.getElementById('status-badge');
     if (!badge) return;
 
-    // [개발 모드] 권한 가이드 오버레이 비활성화 — 권한 테스트 전 개발용
-    const guide = document.getElementById('guide-overlay');
-    if (guide) guide.style.display = 'none';
-
     try {
         const res = await fetch('/api/status');
         const data = await res.json();
@@ -515,14 +511,58 @@ async function checkStatus() {
             badge.className = 'status-badge status-granted';
             badge.innerHTML = `<span>${t('statusGranted')}</span>`;
             badge.onclick = null;
+            // 모든 권한 승인 — 가이드 오버레이 숨김
+            hideGuideOverlay();
         } else {
             badge.className = 'status-badge status-denied';
             const statusKey = (acc || inp) ? 'statusPartial' : 'statusDenied';
             badge.innerHTML = `<span>${t(statusKey)}</span>`;
+            // 권한 미승인 — 가이드 오버레이 표시
+            showGuideOverlay(acc, inp);
         }
     } catch (e) {
         console.error('Status check failed:', e);
     }
+}
+
+function showGuideOverlay(acc, inp) {
+    const overlay = document.getElementById('guide-overlay');
+    if (!overlay) return;
+    overlay.style.display = 'flex';
+
+    // 완료된 단계 체크 표시
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const step3 = document.getElementById('step3');
+    const step4 = document.getElementById('step4');
+    const mainBtn = document.getElementById('guide-main-btn');
+
+    if (step1) step1.className = 'guide-step' + (acc ? ' step-done' : '');
+    if (step2) step2.className = 'guide-step' + (inp ? ' step-done' : '');
+
+    // 두 권한 모두 승인 시 재실행 안내 단계 표시
+    if (acc && inp) {
+        if (step3) step3.style.display = '';
+        if (step4) step4.style.display = '';
+        if (mainBtn) mainBtn.style.display = 'none';
+    } else {
+        if (step3) step3.style.display = '';
+        if (step4) step4.style.display = 'none';
+        // 미승인 권한에 맞게 메인 버튼 동작 변경
+        if (mainBtn) {
+            mainBtn.style.display = '';
+            if (!acc) {
+                mainBtn.onclick = openAccessibilitySettings;
+            } else {
+                mainBtn.onclick = openInputMonitoring;
+            }
+        }
+    }
+}
+
+function hideGuideOverlay() {
+    const overlay = document.getElementById('guide-overlay');
+    if (overlay) overlay.style.display = 'none';
 }
 
 async function openAccessibilitySettings() {
