@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 	"time"
 	"winresizer/utils"
@@ -53,7 +54,7 @@ var (
 var defaultConfigPathFn = resolveDefaultConfigPath
 
 func resolveDefaultConfigPath() string {
-	// 실행 파일 기준 상대 경로로 탐색
+	// 1. 실행 파일 기준 상대 경로로 탐색 (배포 번들)
 	exe, err := os.Executable()
 	if err == nil {
 		candidate := filepath.Join(filepath.Dir(exe), "config", "default-config.json")
@@ -61,7 +62,18 @@ func resolveDefaultConfigPath() string {
 			return candidate
 		}
 	}
-	// 개발 환경: 소스 기준 경로
+
+	// 2. 소스 파일 기준 경로로 탐색 (개발 환경 — IntelliJ 등 CWD가 소스 루트가 아닌 경우 대응)
+	_, srcFile, _, ok := runtime.Caller(0)
+	if ok {
+		// srcFile: .../app/core/config_manager.go → app/ 기준으로 config/default-config.json
+		candidate := filepath.Join(filepath.Dir(srcFile), "..", "config", "default-config.json")
+		if _, err := os.Stat(candidate); err == nil {
+			return candidate
+		}
+	}
+
+	// 3. CWD 기준 폴백 (go run ./... 등)
 	return filepath.Join("config", "default-config.json")
 }
 
