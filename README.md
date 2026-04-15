@@ -79,3 +79,26 @@ go test ./...
 |---|---|
 | 설정 | `~/Library/Application Support/WinResizer/config.json` |
 | 로그 | `~/Library/Application Support/WinResizer/log/` |
+
+## 설정 파일 구조 (default-config.json vs config.json)
+
+파이썬 구현체와 동일하게 **2개 파일** 구조를 사용한다.
+
+| 파일 | 위치 | 역할 |
+|---|---|---|
+| `default-config.json` | `app/config/default-config.json` (소스 내장) | 앱 기본값 정의. 소스코드에 포함되어 배포됨 |
+| `config.json` | `~/Library/Application Support/WinResizer/config.json` | 사용자 실제 설정. 런타임에 생성/수정됨 |
+
+**동작 흐름:**
+
+```
+앱 시작
+  └─ config.json 존재?
+       ├─ YES → config.json 로드 (사용자 설정 사용)
+       └─ NO  → default-config.json 로드 → config.json으로 복사 생성
+```
+
+- `default-config.json`은 읽기 전용 기준값. 앱이 직접 수정하지 않는다.
+- 사용자가 설정 UI에서 변경하면 `config.json`에만 저장된다.
+- `POST /api/config/reset` 호출 시 `default-config.json` 값을 응답으로 반환하지만, `config.json` 파일은 덮어쓰지 않는다 (설계 의도).
+- 관련 구현: `app/core/config_manager.go` — `LoadConfig()`, `LoadDefaultConfig()`
