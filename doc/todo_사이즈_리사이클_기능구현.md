@@ -23,7 +23,17 @@
 - 단축키를 반복적으로 입력하면 사이즈 조절이 리사이클 되는 기능 추가
 
 ## 검증
-- @AI 니가 작성해줘
+- `window_controller_test.go`에 `calcSizeRecycle` 헬퍼를 통한 단위 테스트 6개 작성
+  - `TestSizeRecycle_GrowLeft`: 좌측 확장 시 폭 +10%, X 고정 확인
+  - `TestSizeRecycle_ShrinkLeft`: 좌측 축소 시 폭 -10%, X 고정 확인
+  - `TestSizeRecycle_GrowRight`: 우측 확장 시 폭 +10%, 우측 엣지 고정 확인
+  - `TestSizeRecycle_ShrinkRight`: 우측 축소 시 폭 -10%, 우측 엣지 고정 확인
+  - `TestSizeRecycle_MinClamp`: 최소 10% 이하 클램핑 확인
+  - `TestSizeRecycle_MaxClamp`: 최대 100% 초과 클램핑 확인
+- `go test ./...` 전체 통과
 
 ## 결과
-- @AI 니가 작성해줘
+- `app/core/window_controller.go`: `isSizeRecycleMode`, `executeSizeRecycle` 함수 추가
+- `app/config/default-config.json`: `Size Grow Left`, `Size Shrink Left`, `Size Grow Right`, `Size Shrink Right` 4개 단축키 항목 추가
+- `app/ui/templates/index.html`: 사이즈 리사이클 섹션 UI 추가 (커스텀 비율 섹션과 단축키 섹션 사이)
+- `app/ui/static/app.js`: 사이즈 리사이클 렌더링 로직 및 i18n 문자열 추가

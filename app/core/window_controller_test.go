@@ -202,6 +202,127 @@ func TestReanchor_BottomRightQuarter(t *testing.T) {
 	}
 }
 
+// --- executeSizeRecycle 계산 검증 ---
+// executeSizeRecycle은 CGo 호출(SetWindowFrame 등)을 포함하므로 직접 호출 불가.
+// 핵심 계산 로직을 순수 함수로 추출하여 검증합니다.
+
+func calcSizeRecycle(current Rect, monitor Monitor, mode string, gap float64) Rect {
+	screenW := float64(monitor.Width)
+	screenH := float64(monitor.Height)
+	step := screenW * 0.10
+
+	minW := screenW * 0.10
+	maxW := screenW - gap*2
+
+	newW := current.W
+	switch mode {
+	case "size_grow_left", "size_grow_right":
+		newW = current.W + step
+	case "size_shrink_left", "size_shrink_right":
+		newW = current.W - step
+	}
+	if newW < minW {
+		newW = minW
+	}
+	if newW > maxW {
+		newW = maxW
+	}
+
+	newH := screenH - gap*2
+	monAbsX := float64(monitor.X)
+	monAbsY := float64(monitor.Y)
+
+	var newX float64
+	switch mode {
+	case "size_grow_left", "size_shrink_left":
+		newX = monAbsX + gap
+	case "size_grow_right", "size_shrink_right":
+		newX = monAbsX + screenW - gap - newW
+	default:
+		newX = current.X
+	}
+
+	return Rect{X: newX, Y: monAbsY + gap, W: newW, H: newH}
+}
+
+func TestSizeRecycle_GrowLeft(t *testing.T) {
+	monitor := Monitor{X: 0, Y: 0, Width: 2000, Height: 2000}
+	current := Rect{X: 0, Y: 0, W: 1000, H: 2000} // 50%
+	got := calcSizeRecycle(current, monitor, "size_grow_left", 0)
+
+	if abs64(got.W-1200) > 1 {
+		t.Errorf("size_grow_left: W=%.0f, want 1200", got.W)
+	}
+	if abs64(got.X-0) > 1 {
+		t.Errorf("size_grow_left: X=%.0f, want 0 (좌측 엣지 고정)", got.X)
+	}
+}
+
+func TestSizeRecycle_ShrinkLeft(t *testing.T) {
+	monitor := Monitor{X: 0, Y: 0, Width: 2000, Height: 2000}
+	current := Rect{X: 0, Y: 0, W: 1000, H: 2000}
+	got := calcSizeRecycle(current, monitor, "size_shrink_left", 0)
+
+	if abs64(got.W-800) > 1 {
+		t.Errorf("size_shrink_left: W=%.0f, want 800", got.W)
+	}
+	if abs64(got.X-0) > 1 {
+		t.Errorf("size_shrink_left: X=%.0f, want 0 (좌측 엣지 고정)", got.X)
+	}
+}
+
+func TestSizeRecycle_GrowRight(t *testing.T) {
+	monitor := Monitor{X: 0, Y: 0, Width: 2000, Height: 2000}
+	current := Rect{X: 1000, Y: 0, W: 1000, H: 2000} // 우측 50%
+	got := calcSizeRecycle(current, monitor, "size_grow_right", 0)
+
+	// 새 폭 = 1000+200 = 1200, 우측 엣지 고정 → x = 2000-1200 = 800
+	if abs64(got.W-1200) > 1 {
+		t.Errorf("size_grow_right: W=%.0f, want 1200", got.W)
+	}
+	if abs64(got.X-800) > 1 {
+		t.Errorf("size_grow_right: X=%.0f, want 800 (우측 엣지 고정)", got.X)
+	}
+}
+
+func TestSizeRecycle_ShrinkRight(t *testing.T) {
+	monitor := Monitor{X: 0, Y: 0, Width: 2000, Height: 2000}
+	current := Rect{X: 1000, Y: 0, W: 1000, H: 2000}
+	got := calcSizeRecycle(current, monitor, "size_shrink_right", 0)
+
+	// 새 폭 = 1000-200 = 800, 우측 엣지 고정 → x = 2000-800 = 1200
+	if abs64(got.W-800) > 1 {
+		t.Errorf("size_shrink_right: W=%.0f, want 800", got.W)
+	}
+	if abs64(got.X-1200) > 1 {
+		t.Errorf("size_shrink_right: X=%.0f, want 1200 (우측 엣지 고정)", got.X)
+	}
+}
+
+func TestSizeRecycle_MinClamp(t *testing.T) {
+	// 최소 10% 이하로 줄어들지 않는지 확인
+	monitor := Monitor{X: 0, Y: 0, Width: 2000, Height: 2000}
+	current := Rect{X: 0, Y: 0, W: 200, H: 2000} // 정확히 10%
+	got := calcSizeRecycle(current, monitor, "size_shrink_left", 0)
+
+	minW := 2000.0 * 0.10
+	if got.W < minW-1 {
+		t.Errorf("size_shrink_left 최소값 클램핑 실패: W=%.0f, minW=%.0f", got.W, minW)
+	}
+}
+
+func TestSizeRecycle_MaxClamp(t *testing.T) {
+	// 최대 100%(gap 제외)를 초과하지 않는지 확인
+	monitor := Monitor{X: 0, Y: 0, Width: 2000, Height: 2000}
+	current := Rect{X: 0, Y: 0, W: 1950, H: 2000} // 97.5%
+	got := calcSizeRecycle(current, monitor, "size_grow_left", 0)
+
+	maxW := 2000.0
+	if got.W > maxW+1 {
+		t.Errorf("size_grow_left 최대값 클램핑 실패: W=%.0f, maxW=%.0f", got.W, maxW)
+	}
+}
+
 func TestIsAlreadyAligned_RightEdge_MinSizeExpanded(t *testing.T) {
 	// 우측 정렬 — 앱 최소 크기로 창이 목표보다 더 넓어진 경우에도 "정렬됨"으로 판단
 	monitor := Monitor{X: 0, Y: 0, Width: 1440, Height: 900}

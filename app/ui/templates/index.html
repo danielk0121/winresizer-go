@@ -86,6 +86,32 @@
         </div>
     </div>
 
+    <!-- 사이즈 리사이클 -->
+    <div class="section">
+        <div class="section-title" data-i18n="sizeRecycleSection">사이즈 리사이클</div>
+        <div style="font-size:12px; color:#666; margin-bottom:10px;" data-i18n="sizeRecycleDesc">단축키를 반복 입력할 때마다 창 폭이 10%씩 증가/감소합니다.</div>
+        <div class="row" id="row-Size Grow Left">
+            <span class="label" data-i18n="sizeGrowLeft">좌측 확장 (+10%)</span>
+            <button class="hotkey-btn" id="btn-Size Grow Left" onclick="startRecording('Size Grow Left')" data-i18n-hotkey="Size Grow Left">단축키 입력</button>
+            <button class="delete-btn" onclick="deleteHotkey('Size Grow Left')">✕</button>
+        </div>
+        <div class="row" id="row-Size Shrink Left">
+            <span class="label" data-i18n="sizeShrinkLeft">좌측 축소 (-10%)</span>
+            <button class="hotkey-btn" id="btn-Size Shrink Left" onclick="startRecording('Size Shrink Left')" data-i18n-hotkey="Size Shrink Left">단축키 입력</button>
+            <button class="delete-btn" onclick="deleteHotkey('Size Shrink Left')">✕</button>
+        </div>
+        <div class="row" id="row-Size Grow Right">
+            <span class="label" data-i18n="sizeGrowRight">우측 확장 (+10%)</span>
+            <button class="hotkey-btn" id="btn-Size Grow Right" onclick="startRecording('Size Grow Right')" data-i18n-hotkey="Size Grow Right">단축키 입력</button>
+            <button class="delete-btn" onclick="deleteHotkey('Size Grow Right')">✕</button>
+        </div>
+        <div class="row" id="row-Size Shrink Right">
+            <span class="label" data-i18n="sizeShrinkRight">우측 축소 (-10%)</span>
+            <button class="hotkey-btn" id="btn-Size Shrink Right" onclick="startRecording('Size Shrink Right')" data-i18n-hotkey="Size Shrink Right">단축키 입력</button>
+            <button class="delete-btn" onclick="deleteHotkey('Size Shrink Right')">✕</button>
+        </div>
+    </div>
+
     <!-- 단축키 설정 -->
     <div class="section">
         <div class="section-title" data-i18n="hotkeySection">단축키</div>

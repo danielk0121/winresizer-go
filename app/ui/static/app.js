@@ -15,6 +15,12 @@ const LANG = {
         hotkeySection:'단축키',
         hotkeyDefault:'단축키 입력',
         hotkeyWaiting:'키 입력 대기...',
+        sizeRecycleSection: '사이즈 리사이클',
+        sizeRecycleDesc: '단축키를 반복 입력할 때마다 창 폭이 10%씩 증가/감소합니다.',
+        sizeGrowLeft:   '좌측 확장 (+10%)',
+        sizeShrinkLeft: '좌측 축소 (-10%)',
+        sizeGrowRight:  '우측 확장 (+10%)',
+        sizeShrinkRight:'우측 축소 (-10%)',
         gapSection:   '창 간격 (Gap)',
         confirmClear: '전체 단축키를 삭제할까요?',
         clearDone:    '모든 단축키가 삭제되었습니다. (저장 버튼을 눌러야 반영됩니다)',
@@ -53,6 +59,12 @@ const LANG = {
         hotkeySection:'Hotkeys',
         hotkeyDefault:'Press hotkey',
         hotkeyWaiting:'Waiting for key...',
+        sizeRecycleSection: 'Size Recycle',
+        sizeRecycleDesc: 'Window width changes by 10% each time the hotkey is pressed.',
+        sizeGrowLeft:   'Left Expand (+10%)',
+        sizeShrinkLeft: 'Left Shrink (-10%)',
+        sizeGrowRight:  'Right Expand (+10%)',
+        sizeShrinkRight:'Right Shrink (-10%)',
         gapSection:   'Window Gap',
         confirmClear: 'Delete all hotkeys?',
         clearDone:    'All hotkeys deleted. (Must click Save to apply)',
@@ -156,6 +168,10 @@ const HOTKEY_LABELS = {
         'Bottom Right 1/4': '우하단 1/4',
         'Maximize':         '최대화',
         'Restore':          '복구',
+        'Size Grow Left':   '좌측 확장 (+10%)',
+        'Size Shrink Left': '좌측 축소 (-10%)',
+        'Size Grow Right':  '우측 확장 (+10%)',
+        'Size Shrink Right':'우측 축소 (-10%)',
     },
     en: {},  // 영어는 키 이름 그대로 사용
 };
@@ -163,6 +179,9 @@ const HOTKEY_LABELS = {
 function hotkeyLabel(name) {
     return HOTKEY_LABELS[currentLang]?.[name] || name;
 }
+
+// 사이즈 리사이클 단축키 목록
+const SIZE_RECYCLE_KEYS = ['Size Grow Left', 'Size Shrink Left', 'Size Grow Right', 'Size Shrink Right'];
 
 // 단축키 섹션 렌더링 순서
 const HOTKEY_ORDER = [
@@ -191,7 +210,14 @@ async function loadConfig() {
 function loadConfigUI() {
     // 1. 모든 DOM 값(input)들을 먼저 설정
     document.getElementById('gap').value = config.settings?.gap ?? 5;
-    
+
+    // config에 사이즈 리사이클 단축키가 없으면 기본값으로 초기화
+    for (const name of SIZE_RECYCLE_KEYS) {
+        if (!config.shortcuts[name]) {
+            config.shortcuts[name] = { display: '', mode: '', keycode: 0, modifiers: 0 };
+        }
+    }
+
     for (const name of CUSTOM_KEYS) {
         const info = config.shortcuts?.[name];
         if (!info) continue;
@@ -209,6 +235,7 @@ function loadConfigUI() {
     applyLang();
     renderHotkeys();
     renderCustomHotkeys();
+    renderSizeRecycleHotkeys();
     renderGap();
 }
 
@@ -278,6 +305,23 @@ function renderCustomHotkeys() {
     }
 }
 
+function renderSizeRecycleHotkeys() {
+    for (const name of SIZE_RECYCLE_KEYS) {
+        const info = config.shortcuts?.[name];
+        if (!info) continue;
+
+        const row = document.getElementById('row-' + name);
+        if (row) {
+            row.className = 'row' + (isModified(name) ? ' modified' : '');
+        }
+
+        const btn = document.getElementById('btn-' + name);
+        if (btn && !btn.classList.contains('recording')) {
+            btn.textContent = info.keycode ? info.display : t('hotkeyDefault');
+        }
+    }
+}
+
 function renderGap() {
     const row = document.getElementById('row-gap');
     if (row) {
@@ -302,6 +346,7 @@ function stopRecording() {
     // 변경 사항이 있을 수 있으므로 렌더링 갱신
     renderHotkeys();
     renderCustomHotkeys();
+    renderSizeRecycleHotkeys();
 }
 
 // ── Carbon keycode 변환 맵 (브라우저 e.code → macOS Virtual Key Code) ──
@@ -394,6 +439,7 @@ function deleteHotkey(name) {
     config.shortcuts[name].display   = '';
     renderHotkeys();
     renderCustomHotkeys();
+    renderSizeRecycleHotkeys();
 }
 
 function clearAll() {
@@ -405,6 +451,7 @@ function clearAll() {
     }
     renderHotkeys();
     renderCustomHotkeys();
+    renderSizeRecycleHotkeys();
     renderGap();
 
     const status = document.getElementById('status');
@@ -469,6 +516,7 @@ async function saveConfig() {
         initialConfig = deepCopy(config); // 저장 성공 시 초기값 갱신하여 음영 제거
         renderHotkeys();
         renderCustomHotkeys();
+        renderSizeRecycleHotkeys();
         renderGap();
         status.style.color = '#2ecc71';
         status.textContent = getTimeString() + t('saveDone');

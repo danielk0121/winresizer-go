@@ -161,6 +161,11 @@ func ExecuteWindowCommand(mode string) error {
 		gap = float64(cfg.Settings.Gap)
 	}
 
+	// 사이즈 리사이클: 현재 창 폭을 기준으로 10% 증감
+	if isSizeRecycleMode(mode) {
+		return executeSizeRecycle(pid, currentFrame, targetMonitor, mode, gap)
+	}
+
 	// 목표 좌표 계산
 	screenW := float64(targetMonitor.Width)
 	screenH := float64(targetMonitor.Height)
@@ -299,6 +304,74 @@ func moveToNextDisplay(pid int, current Rect, monitors []Monitor, currentMonitor
 	SetWindowFrame(pid, Rect{newX, newY, newW, newH})
 	ActivateApp(pid)
 	utils.Log.Infof("다음 모니터로 이동: pid=%d", pid)
+	return nil
+}
+
+// isSizeRecycleMode는 사이즈 리사이클 모드인지 확인합니다.
+func isSizeRecycleMode(mode string) bool {
+	switch mode {
+	case "size_grow_left", "size_shrink_left", "size_grow_right", "size_shrink_right":
+		return true
+	}
+	return false
+}
+
+// executeSizeRecycle은 현재 창 폭을 기준으로 10% 증감합니다.
+// left 계열: 좌측 엣지(x) 고정, 우측으로 확장/축소
+// right 계열: 우측 엣지 고정, 좌측으로 확장/축소
+func executeSizeRecycle(pid int, current Rect, monitor Monitor, mode string, gap float64) error {
+	screenW := float64(monitor.Width)
+	screenH := float64(monitor.Height)
+	step := screenW * 0.10 // 10% 스텝
+
+	minW := screenW * 0.10
+	maxW := screenW - gap*2
+
+	newW := current.W
+	switch mode {
+	case "size_grow_left", "size_grow_right":
+		newW = current.W + step
+	case "size_shrink_left", "size_shrink_right":
+		newW = current.W - step
+	}
+
+	// 범위 클램핑
+	if newW < minW {
+		newW = minW
+	}
+	if newW > maxW {
+		newW = maxW
+	}
+
+	newH := screenH - gap*2
+	monAbsX := float64(monitor.X)
+	monAbsY := float64(monitor.Y)
+
+	var newX float64
+	switch mode {
+	case "size_grow_left", "size_shrink_left":
+		// 좌측 엣지 고정 (x = 모니터 좌측 + gap)
+		newX = monAbsX + gap
+	case "size_grow_right", "size_shrink_right":
+		// 우측 엣지 고정 (x = 모니터 우측 - gap - newW)
+		newX = monAbsX + screenW - gap - newW
+	default:
+		newX = current.X
+	}
+
+	target := Rect{X: newX, Y: monAbsY + gap, W: newW, H: newH}
+	SetWindowFrame(pid, target)
+
+	// Re-anchoring
+	actual := GetWindowFrame(pid)
+	corrected := reanchor(actual, monitor, mode, gap)
+	if corrected != actual {
+		utils.Log.Infof("Re-anchoring 적용: pid=%d mode=%s", pid, mode)
+		SetWindowFrame(pid, corrected)
+	}
+
+	ActivateApp(pid)
+	utils.Log.Infof("사이즈 리사이클 완료: pid=%d mode=%s newW=%.0f", pid, mode, newW)
 	return nil
 }
 

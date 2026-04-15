@@ -95,6 +95,30 @@
             "mode": "bottom_right_1/4",
             "keycode": 0,
             "modifiers": 0
+        },
+        "Size Grow Left": {
+            "display": "",
+            "mode": "size_grow_left",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Size Shrink Left": {
+            "display": "",
+            "mode": "size_shrink_left",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Size Grow Right": {
+            "display": "",
+            "mode": "size_grow_right",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Size Shrink Right": {
+            "display": "",
+            "mode": "size_shrink_right",
+            "keycode": 0,
+            "modifiers": 0
         }
     }
 }
