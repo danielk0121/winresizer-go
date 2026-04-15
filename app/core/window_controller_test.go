@@ -99,6 +99,36 @@ func TestIsAlreadyAligned_NotAligned(t *testing.T) {
 	}
 }
 
+func TestReanchor_CustomRightMode(t *testing.T) {
+	// right_custom:35 — 앱 최소 크기로 확장된 경우 보정
+	monitor := Monitor{X: 0, Y: 0, Width: 1440, Height: 900}
+	// 목표: 35% = 504px, x = 1440-504 = 936
+	// 실제: 크롬 최소 폭 600px → x=936, w=600 → 936+600=1536 > 1440 초과
+	actual := Rect{X: 936, Y: 0, W: 600, H: 900}
+	corrected := reanchor(actual, monitor, "right_custom:35", 0)
+
+	expectedX := float64(1440) - 600.0 // 840
+	if abs64(corrected.X-expectedX) > 1.0 {
+		t.Errorf("right_custom reanchor 보정 실패: got X=%.1f, want X=%.1f", corrected.X, expectedX)
+	}
+}
+
+func TestReanchor_BottomRightQuarter(t *testing.T) {
+	// bottom_right_1/4 — 우측+하단 모두 보정
+	monitor := Monitor{X: 0, Y: 0, Width: 1440, Height: 900}
+	actual := Rect{X: 800, Y: 550, W: 700, H: 400} // 우측 1540>1440, 하단 950>900 초과
+	corrected := reanchor(actual, monitor, "bottom_right_1/4", 0)
+
+	expectedX := float64(1440) - 700.0 // 740
+	expectedY := float64(900) - 400.0  // 500
+	if abs64(corrected.X-expectedX) > 1.0 {
+		t.Errorf("bottom_right 우측 보정 실패: got X=%.1f, want X=%.1f", corrected.X, expectedX)
+	}
+	if abs64(corrected.Y-expectedY) > 1.0 {
+		t.Errorf("bottom_right 하단 보정 실패: got Y=%.1f, want Y=%.1f", corrected.Y, expectedY)
+	}
+}
+
 func TestIsAlreadyAligned_RightEdge_MinSizeExpanded(t *testing.T) {
 	// 우측 정렬 — 앱 최소 크기로 창이 목표보다 더 넓어진 경우에도 "정렬됨"으로 판단
 	monitor := Monitor{X: 0, Y: 0, Width: 1440, Height: 900}
