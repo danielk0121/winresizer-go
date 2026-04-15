@@ -32,6 +32,9 @@ Thumbs.db
 node_modules/
 package-lock.json
 
+# gen_icon 결과물
+build-work/gen_icon/out/
+
 # IDE
 .idea/
 .vscode/

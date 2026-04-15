@@ -6,7 +6,7 @@ const { execSync } = require('child_process');
 
 const SCRIPT_DIR = __dirname;
 const SVG_PATH = path.join(SCRIPT_DIR, 'wr_icon.svg');
-const ICONSET_DIR = path.join(SCRIPT_DIR, 'icon.iconset');
+const ICONSET_DIR = path.join(SCRIPT_DIR, 'out', 'icon.iconset');
 const APP_UI = path.join(SCRIPT_DIR, '../../app/ui');
 
 // iconset 규격
@@ -44,10 +44,12 @@ async function main() {
   console.log(`  icon.icns: ${icnsOut}`);
 
   console.log('==> tray_icon.png (22px)');
+  const trayLocal = path.join(SCRIPT_DIR, 'out', 'tray_icon.png');
   const trayOut = path.join(APP_UI, 'tray_icon.png');
   // 작은 사이즈는 먼저 큰 해상도로 렌더링 후 다운스케일
   const trayBuf = await sharp(svgBuf).resize(88, 88).png().toBuffer();
-  await sharp(trayBuf).resize(22, 22).png().toFile(trayOut);
+  await sharp(trayBuf).resize(22, 22).png().toFile(trayLocal);
+  fs.copyFileSync(trayLocal, trayOut);
   console.log(`  tray_icon.png: ${trayOut}`);
 
   console.log('==> favicon.png');
