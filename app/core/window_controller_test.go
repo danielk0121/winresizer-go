@@ -4,6 +4,32 @@ import (
 	"testing"
 )
 
+// --- IsSimilar 테스트 ---
+
+func TestIsSimilar_ExactMatch(t *testing.T) {
+	a := Rect{X: 0, Y: 0, W: 720, H: 900}
+	b := Rect{X: 0, Y: 0, W: 720, H: 900}
+	if !IsSimilar(a, b, 5.0) {
+		t.Error("정확히 일치하는 경우 IsSimilar가 false를 반환")
+	}
+}
+
+func TestIsSimilar_WithinTolerance(t *testing.T) {
+	a := Rect{X: 2, Y: 1, W: 718, H: 898}
+	b := Rect{X: 0, Y: 0, W: 720, H: 900}
+	if !IsSimilar(a, b, 5.0) {
+		t.Error("허용 오차(5px) 내 차이인데 IsSimilar가 false를 반환")
+	}
+}
+
+func TestIsSimilar_OutOfTolerance(t *testing.T) {
+	a := Rect{X: 10, Y: 0, W: 720, H: 900}
+	b := Rect{X: 0, Y: 0, W: 720, H: 900}
+	if IsSimilar(a, b, 5.0) {
+		t.Error("허용 오차(5px) 초과인데 IsSimilar가 true를 반환")
+	}
+}
+
 // --- reanchor 테스트 ---
 
 func TestReanchor_RightOverflow(t *testing.T) {
