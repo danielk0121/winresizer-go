@@ -7,28 +7,28 @@
     },
     "shortcuts": {
         "Left": {
-            "display": "ctrl + opt + cmd + left",
+            "display": "",
             "mode": "left_half",
-            "keycode": 123,
-            "modifiers": 6400
+            "keycode": 0,
+            "modifiers": 0
         },
         "Right": {
-            "display": "ctrl + opt + cmd + right",
+            "display": "",
             "mode": "right_half",
-            "keycode": 124,
-            "modifiers": 6400
+            "keycode": 0,
+            "modifiers": 0
         },
         "Top": {
-            "display": "ctrl + opt + cmd + up",
+            "display": "ctrl + opt + ArrowUp",
             "mode": "top_half",
             "keycode": 126,
-            "modifiers": 6400
+            "modifiers": 6144
         },
         "Bottom": {
-            "display": "ctrl + opt + cmd + down",
+            "display": "ctrl + opt + ArrowDown",
             "mode": "bottom_half",
             "keycode": 125,
-            "modifiers": 6400
+            "modifiers": 6144
         },
         "Maximize": {
             "display": "",
@@ -96,29 +96,53 @@
             "keycode": 0,
             "modifiers": 0
         },
-        "Size Grow Left": {
+        "Left Custom": {
             "display": "",
-            "mode": "size_grow_left",
+            "mode": "left_custom:60",
             "keycode": 0,
             "modifiers": 0
+        },
+        "Right Custom": {
+            "display": "",
+            "mode": "right_custom:60",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Top Custom": {
+            "display": "",
+            "mode": "top_custom:70",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Bottom Custom": {
+            "display": "",
+            "mode": "bottom_custom:70",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Size Grow Left": {
+            "display": "ctrl + opt + ArrowLeft",
+            "mode": "size_grow_left",
+            "keycode": 123,
+            "modifiers": 6144
         },
         "Size Shrink Left": {
-            "display": "",
+            "display": "ctrl + opt + shift + ArrowLeft",
             "mode": "size_shrink_left",
-            "keycode": 0,
-            "modifiers": 0
+            "keycode": 123,
+            "modifiers": 6656
         },
         "Size Grow Right": {
-            "display": "",
+            "display": "ctrl + opt + ArrowRight",
             "mode": "size_grow_right",
-            "keycode": 0,
-            "modifiers": 0
+            "keycode": 124,
+            "modifiers": 6144
         },
         "Size Shrink Right": {
-            "display": "",
+            "display": "ctrl + opt + shift + ArrowRight",
             "mode": "size_shrink_right",
-            "keycode": 0,
-            "modifiers": 0
+            "keycode": 124,
+            "modifiers": 6656
         }
     }
 }
