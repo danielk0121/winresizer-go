@@ -1,0 +1,62 @@
+{
+  "context": {
+    "fileName": [
+      ".gemini/system.md",
+      "AGENTS.md"
+    ]
+  },
+  "model": {
+    "name": "gemini-3-flash-preview"
+  },
+  "modelConfigs": {
+    "customAliases": {
+      "chat-base": {
+        "modelConfig": {
+          "generateContentConfig": {
+            "thinkingConfig": {
+              "thinkingLevel": "MEDIUM"
+            }
+          }
+        }
+      }
+    }
+  },
+  "agents": {
+    "overrides": {
+      "codebase_investigator": {
+        "modelConfig": {
+          "model": "gemini-3.1-flash-lite-preview",
+          "generateContentConfig": {
+            "thinkingConfig": {
+              "thinkingLevel": "MEDIUM"
+            }
+          }
+        }
+      },
+      "generalist": {
+        "modelConfig": {
+          "model": "gemini-3-flash-preview",
+          "generateContentConfig": {
+            "thinkingConfig": {
+              "thinkingLevel": "MEDIUM"
+            }
+          }
+        }
+      },
+      "web_searcher": {
+        "runConfig": {
+          "maxTimeMinutes": 2,
+          "maxTurns": 30
+        },
+        "modelConfig": {
+          "model": "gemini-3.1-pro-preview",
+          "generateContentConfig": {
+            "thinkingConfig": {
+              "thinkingLevel": "HIGH"
+            }
+          }
+        }
+      }
+    }
+  }
+}
