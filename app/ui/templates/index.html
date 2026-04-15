@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WinResizer 설정</title>
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- 권한 안내 가이드 오버레이 -->
+    <div id="guide-overlay" class="guide-overlay" style="display: none;">
+        <div class="guide-card">
+            <div class="guide-title" data-i18n="guideTitle">WinResizer 시작하기</div>
+            <div class="guide-steps">
+                <div id="step1" class="guide-step">
+                    <div class="step-text" data-i18n="guideStep1">1. <b>손쉬운 사용</b> 권한을 허용해 주세요. <button class="step-btn" onclick="openAccessibilitySettings()">설정 열기</button></div>
+                </div>
+                <div id="step2" class="guide-step">
+                    <div class="step-text" data-i18n="guideStep2">2. <b>입력 모니터링</b> 권한을 허용해 주세요. <button class="step-btn" onclick="openInputMonitoring()">설정 열기</button></div>
+                </div>
+                <div id="step3" class="guide-step">
+                    <div class="step-text" data-i18n="guideStep3">3. 설정을 모두 마쳤다면 <b>앱을 종료 후 다시 실행</b>해 주세요.</div>
+                </div>
+                <div id="step4" class="guide-step" style="display: none;">
+                    <div class="step-text" data-i18n="guideStep4">4. 모든 준비가 완료되었습니다!</div>
+                </div>
+            </div>
+            <button id="guide-main-btn" class="guide-btn" onclick="openAccessibilitySettings()" data-i18n="guideBtn">시스템 설정 열기</button>
+            <div class="guide-notice" data-i18n="guideNotice">권한 승인 후 이 창이 자동으로 닫히지 않으면 페이지를 새로고침 하세요.</div>
+        </div>
+    </div>
+
+    <!-- 헤더: 제목 + 언어 전환 버튼 -->
+    <div class="header">
+        <h1 data-i18n="title">WinResizer 설정</h1>
+        <div class="lang-toggle">
+            <button class="lang-btn active" id="lang-ko" onclick="setLang('ko')">KOR</button>
+            <button class="lang-btn" id="lang-en" onclick="setLang('en')">ENG</button>
+        </div>
+    </div>
+
+    <!-- 저장/초기화 버튼 (최상단) -->
+    <div id="status-badge" class="status-badge status-loading">
+        <span data-i18n="statusChecking">권한 확인 중...</span>
+    </div>
+    <button class="save-btn" onclick="saveConfig()" data-i18n="saveBtn">저장 및 적용</button>
+    <button class="clear-btn" onclick="clearAll()" data-i18n="clearBtn">전체 단축키 삭제</button>
+    <button class="reset-btn" onclick="resetConfig()" data-i18n="resetBtn">기본 세팅값으로 초기화</button>
+    <div id="status"></div>
+
+    <!-- 커스텀 비율 창 조절 -->
+    <div class="section" style="margin-top: 12px;">
+        <div class="section-title" data-i18n="customSection">커스텀 비율 창 조절</div>
+        <div style="font-size:12px; color:#666; margin-bottom:10px;" data-i18n="customDesc">비율(1~100%)을 입력하고 단축키를 설정하세요. 적용 버튼으로 즉시 실행도 가능합니다.</div>
+        <div class="custom-row" id="row-Left Custom">
+            <span class="custom-label" data-i18n="dirLeft">좌측</span>
+            <input class="pct-input" id="pct-left" type="number" min="1" max="100" value="75" placeholder="1~100" oninput="renderCustomHotkeys()">
+            <span style="color:#aaa; font-size:14px;">%</span>
+            <button class="hotkey-btn" id="btn-Left Custom" style="flex:1;" onclick="startRecording('Left Custom')" data-i18n-hotkey="Left Custom">단축키 입력</button>
+            <button class="delete-btn" onclick="deleteHotkey('Left Custom')">✕</button>
+        </div>
+        <div class="custom-row" id="row-Right Custom">
+            <span class="custom-label" data-i18n="dirRight">우측</span>
+            <input class="pct-input" id="pct-right" type="number" min="1" max="100" value="75" placeholder="1~100" oninput="renderCustomHotkeys()">
+            <span style="color:#aaa; font-size:14px;">%</span>
+            <button class="hotkey-btn" id="btn-Right Custom" style="flex:1;" onclick="startRecording('Right Custom')" data-i18n-hotkey="Right Custom">단축키 입력</button>
+            <button class="delete-btn" onclick="deleteHotkey('Right Custom')">✕</button>
+        </div>
+        <div class="custom-row" id="row-Top Custom">
+            <span class="custom-label" data-i18n="dirTop">상단</span>
+            <input class="pct-input" id="pct-top" type="number" min="1" max="100" value="75" placeholder="1~100" oninput="renderCustomHotkeys()">
+            <span style="color:#aaa; font-size:14px;">%</span>
+            <button class="hotkey-btn" id="btn-Top Custom" style="flex:1;" onclick="startRecording('Top Custom')" data-i18n-hotkey="Top Custom">단축키 입력</button>
+            <button class="delete-btn" onclick="deleteHotkey('Top Custom')">✕</button>
+        </div>
+        <div class="custom-row" id="row-Bottom Custom">
+            <span class="custom-label" data-i18n="dirBottom">하단</span>
+            <input class="pct-input" id="pct-bottom" type="number" min="1" max="100" value="75" placeholder="1~100" oninput="renderCustomHotkeys()">
+            <span style="color:#aaa; font-size:14px;">%</span>
+            <button class="hotkey-btn" id="btn-Bottom Custom" style="flex:1;" onclick="startRecording('Bottom Custom')" data-i18n-hotkey="Bottom Custom">단축키 입력</button>
+            <button class="delete-btn" onclick="deleteHotkey('Bottom Custom')">✕</button>
+        </div>
+    </div>
+
+    <!-- 단축키 설정 -->
+    <div class="section">
+        <div class="section-title" data-i18n="hotkeySection">단축키</div>
+        <div id="hotkey-list"></div>
+    </div>
+
+    <!-- 창 간격 (최하단) -->
+    <div class="section">
+        <div class="section-title" data-i18n="gapSection">창 간격 (Gap)</div>
+        <div class="gap-row" id="row-gap">
+            <label class="label">Gap (px)</label>
+            <input class="gap-input" id="gap" type="number" min="0" max="50" value="5" oninput="renderGap()">
+        </div>
+    </div>
+
+    <footer>
+        <a href="https://github.com/danielk0121" target="_blank">github.com/danielk0121</a>
+        <span>ver-260414-2328</span>
+    </footer>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

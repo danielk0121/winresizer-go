@@ -49,7 +49,7 @@
 | 역할 | Python (현재) | Go 대응 |
 |---|---|---|
 | 메뉴바 트레이 | `rumps` | `github.com/getlantern/systray` |
-| 웹 서버 (설정 UI) | `Flask` | `net/http` (표준 라이브러리) |
+| 웹 서버 (설정 UI) | `Flask` | `github.com/gin-gonic/gin` |
 | 설정 파일 (JSON) | `json` 표준 | `encoding/json` (표준 라이브러리) |
 | 글로벌 단축키 | `pynput` | CGo + Carbon `RegisterEventHotKey` |
 | 창 제어 (AX API) | `pyobjc` | CGo + `ApplicationServices` 프레임워크 |
@@ -86,7 +86,7 @@ winresizer-go/
 │   └── config_manager.go         # config.json 읽기/쓰기
 │
 ├── server/
-│   ├── web_server.go              # net/http 설정 웹서버
+│   ├── web_server.go              # gin 설정 웹서버
 │   └── handlers.go                # API 핸들러 (/api/config, /api/execute 등)
 │
 ├── ui/
@@ -113,7 +113,7 @@ winresizer-go/
 |---|---|---|---|
 | 1 | **메인 고루틴** (systray) | macOS 메뉴바 UI 및 앱 생명주기 | CGo AX API 직접 호출 |
 | 2 | **HotkeyListener 고루틴** | Carbon 글로벌 단축키 감지 | 백그라운드 상시 대기 |
-| 3 | **웹서버 고루틴** | `net/http` 설정 UI 및 API | 랜덤 포트 할당 |
+| 3 | **웹서버 고루틴** | `gin` 설정 UI 및 API | 랜덤 포트 할당 |
 
 > Python 버전과 스레드 구성 동일. `goroutine` + `channel`로 안전한 통신.
 
