@@ -21,9 +21,16 @@ if [ -f ui/icon.icns ]; then
 fi
 
 echo "==> Creating DMG"
+# 드래그 설치용 임시 폴더 구성
+mkdir -p dist/dmg
+cp -r "${BUNDLE_DIR}" dist/dmg/
+ln -sf /Applications dist/dmg/Applications
+
 hdiutil create -volname "${APP_NAME}" \
-    -srcfolder dist/ \
+    -srcfolder dist/dmg \
     -ov -format UDZO \
     "dist/${APP_NAME}.dmg"
+
+rm -rf dist/dmg
 
 echo "==> Done: dist/${APP_NAME}.dmg"
