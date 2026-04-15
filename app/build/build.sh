@@ -11,11 +11,8 @@ echo "==> Cleaning dist/"
 rm -rf dist/
 mkdir -p "${MACOS_DIR}" "${RESOURCES_DIR}"
 
-echo "==> Building Universal Binary"
-GOARCH=amd64 go build -o dist/winresizer-amd64 .
-GOARCH=arm64 go build -o dist/winresizer-arm64 .
-lipo -create dist/winresizer-amd64 dist/winresizer-arm64 -output "${MACOS_DIR}/${APP_NAME}"
-rm dist/winresizer-amd64 dist/winresizer-arm64
+echo "==> Building binary (현재 아키텍처: $(uname -m))"
+go build -o "${MACOS_DIR}/${APP_NAME}" .
 
 echo "==> Copying resources"
 cp build/Info.plist "${CONTENTS_DIR}/Info.plist"
