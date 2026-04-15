@@ -89,6 +89,14 @@ void setWindowFrame(pid_t pid, float x, float y, float width, float height) {
 }
 
 void activateApp(pid_t pid) {
+    // 1차: AX API로 kAXFrontmostAttribute 직접 설정 (창 단위 포커스 재부여)
+    AXUIElementRef appRef = AXUIElementCreateApplication(pid);
+    if (appRef) {
+        AXUIElementSetAttributeValue(appRef, kAXFrontmostAttribute, kCFBooleanTrue);
+        CFRelease(appRef);
+    }
+
+    // 2차: NSRunningApplication activate (앱 레벨 포커스 재부여)
     NSRunningApplication* app = [NSRunningApplication runningApplicationWithProcessIdentifier:pid];
     if (app) {
         [app activateWithOptions:NSApplicationActivateIgnoringOtherApps];
