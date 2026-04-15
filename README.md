@@ -19,6 +19,10 @@ macOS 창 크기/위치를 글로벌 단축키로 조절하는 트레이 앱. Py
 | Go | 1.22 이상 |
 | 기타 | Xcode Command Line Tools (CGo 빌드용) |
 
+## 스크린샷
+
+![앱_스크린샷](ref/img_5.png)
+
 ## 설치 및 실행 (Quick Guide)
 
 ```bash
