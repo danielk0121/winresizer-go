@@ -27,6 +27,10 @@ if [ -f "${APP_DIR}/ui/icon.icns" ]; then
     cp "${APP_DIR}/ui/icon.icns" "${RESOURCES_DIR}/icon.icns"
 fi
 
+# 빌드 시간 마커 파일 생성
+BUILD_TIME=$(date +"%Y%m%d-%H%M")
+touch "${CONTENTS_DIR}/buildtime-${BUILD_TIME}.txt"
+
 echo "==> Code signing (ad-hoc)"
 codesign --force --deep --sign - \
     --entitlements "${SCRIPT_DIR}/entitlements.plist" \
