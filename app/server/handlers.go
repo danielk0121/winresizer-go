@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"strings"
 	"winresizer/core"
 	"winresizer/ui"
 	"winresizer/utils"
@@ -36,7 +37,11 @@ func registerRoutes(r *gin.Engine) {
 
 // GET /
 func handleIndex(c *gin.Context) {
-	c.HTML(http.StatusOK, "index.html", nil)
+	version := ""
+	if b, err := ui.Assets.ReadFile("version-time.txt"); err == nil {
+		version = strings.TrimSpace(string(b))
+	}
+	c.HTML(http.StatusOK, "index.html", gin.H{"Version": version})
 }
 
 // GET /api/status
