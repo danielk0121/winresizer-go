@@ -32,3 +32,29 @@ hdiutil create -volname "WinResizer" \
 ## 검증 방법
 - DMG 마운트 후 Applications 폴더로 드래그 설치
 - 설치된 앱 실행 → 정상 동작 확인
+
+## 작업 결과
+
+**상태**: 완료
+
+**수정 파일**: `app/build/build.sh`
+
+**변경 내용**:
+`build.sh`의 DMG 생성 단계에 `/Applications` 심볼릭 링크 추가. 드래그 설치 UX 개선.
+
+```bash
+mkdir -p dist/dmg
+cp -r "${BUNDLE_DIR}" dist/dmg/
+ln -sf /Applications dist/dmg/Applications   # 드래그 설치용
+
+hdiutil create -volname "${APP_NAME}" \
+    -srcfolder dist/dmg \
+    -ov -format UDZO \
+    "dist/${APP_NAME}.dmg"
+
+rm -rf dist/dmg
+```
+
+빌드 완료 후 `dist/WinResizer.dmg` (~10MB) 생성 확인.
+
+**커밋**: `2a0367d`

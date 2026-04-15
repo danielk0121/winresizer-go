@@ -22,3 +22,18 @@
 
 ## 참고 문서
 - `doc/ing/spec_권한_가이드_UX.md`
+
+## 작업 결과
+
+**상태**: 완료
+
+**수정 파일**: `app/ui/static/app.js`
+
+**변경 내용**:
+개발용 강제 숨김 코드 제거, 권한 상태 기반 오버레이 표시/숨김 함수 추가.
+
+- `showGuideOverlay(acc, inp)`: 미승인 권한에 따라 단계 표시, 완료 단계는 `step-done` 클래스 적용, 주 버튼 onclick을 미승인 권한 오픈 커맨드로 설정
+- `hideGuideOverlay()`: 오버레이 숨김
+- `checkStatus()` 내 로직: 모든 권한 승인 시 `hideGuideOverlay()`, 하나라도 미승인 시 `showGuideOverlay(acc, inp)` 호출
+
+**커밋**: `ebc7600`

@@ -27,3 +27,29 @@ AXUIElementSetAttributeValue(appElement, kAXFrontmostAttribute, kCFBooleanTrue);
 
 ## 참고 문서
 - `doc/ing/known_issue_포커스_유실.md`
+
+## 작업 결과
+
+**상태**: 완료
+
+**수정 파일**: `app/core/window_controller_darwin.m`
+
+**변경 내용**:
+`activateApp()` 함수에 `kAXFrontmostAttribute` AX API 호출을 `NSRunningApplication activate` 이전에 추가.
+```c
+void activateApp(pid_t pid) {
+    // 1차: AX API로 kAXFrontmostAttribute 직접 설정 (창 단위 포커스 재부여)
+    AXUIElementRef appRef = AXUIElementCreateApplication(pid);
+    if (appRef) {
+        AXUIElementSetAttributeValue(appRef, kAXFrontmostAttribute, kCFBooleanTrue);
+        CFRelease(appRef);
+    }
+    // 2차: NSRunningApplication activate (앱 레벨 포커스 재부여)
+    NSRunningApplication* app = [NSRunningApplication runningApplicationWithProcessIdentifier:pid];
+    if (app) {
+        [app activateWithOptions:NSApplicationActivateIgnoringOtherApps];
+    }
+}
+```
+
+**커밋**: `d1774fa` (embed 정적 파일, 트레이 아이콘 내장; 단축키 keycode/modifiers 방식으로 교체; deleteHotkey 버그 수정)

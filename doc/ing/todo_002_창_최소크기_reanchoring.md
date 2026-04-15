@@ -34,3 +34,34 @@ if actualBounds.width > targetWidth {
 
 ## 참고 문서
 - `doc/ing/known_issue_창_최소크기_화면짤림.md`
+
+## 작업 결과
+
+**상태**: 완료
+
+**수정 파일**: `app/core/window_controller.go`, `app/core/window_controller_test.go`
+
+**변경 내용**:
+`ExecuteWindowCommand()` 내에 `reanchor()` 함수 호출 추가. `setWindowFrame` 직후 실제 창 위치를 다시 읽어 화면 밖 초과 여부를 판별하고 X/Y 보정.
+
+```go
+// 창 이동
+SetWindowFrame(pid, targetAbs)
+
+// Re-anchoring: 앱 최소 크기 제한으로 인한 화면 밖 짤림 보정
+actual := GetWindowFrame(pid)
+corrected := reanchor(actual, targetMonitor, mode, gap)
+if corrected != actual {
+    SetWindowFrame(pid, corrected)
+}
+```
+
+`reanchor()` 함수: `right` 계열은 우측 엣지 초과 시 X 보정, `bottom` 계열은 하단 엣지 초과 시 Y 보정.
+
+**추가된 테스트**:
+- `TestReanchor_RightOverflow` / `TestReanchor_RightNoOverflow`
+- `TestReanchor_BottomOverflow` / `TestReanchor_WithGap` / `TestReanchor_LeftMode_NoChange`
+- `TestReanchor_CustomRightMode` / `TestReanchor_BottomRightQuarter`
+- `TestIsAlreadyAligned_RightEdge_MinSizeExpanded`
+
+**커밋**: `d1774fa`

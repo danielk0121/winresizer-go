@@ -25,3 +25,25 @@
 
 ## 참고 문서
 - `doc/ing/known_issue_단축키_충돌.md`
+
+## 작업 결과
+
+**상태**: 완료
+
+**수정 파일**: `app/config/default-config.json`
+
+**변경 내용**:
+4방향 기본 단축키를 `Ctrl+Opt+Cmd+방향키`로 설정.
+
+| 단축키 | keycode | modifiers |
+|--------|---------|-----------|
+| Ctrl+Opt+Cmd+Left  | 123 | 6400 |
+| Ctrl+Opt+Cmd+Right | 124 | 6400 |
+| Ctrl+Opt+Cmd+Up    | 126 | 6400 |
+| Ctrl+Opt+Cmd+Down  | 125 | 6400 |
+
+modifiers 6400 = cmdKey(256) + optionKey(2048) + controlKey(4096)
+
+기존 `~/Library/Application Support/WinResizer/config.json` 사용자 설정에는 영향 없음.
+
+**커밋**: `9c5e87a`

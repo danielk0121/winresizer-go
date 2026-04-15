@@ -35,3 +35,27 @@ cp -r app/config WinResizer.app/Contents/
 ## 검증 방법
 - `.app` 더블클릭 → 트레이 아이콘 표시 확인
 - `~/Library/Application Support/WinResizer/config.json` 생성 확인
+
+## 작업 결과
+
+**상태**: 완료
+
+**수정 파일**: `app/build/build.sh`
+
+**변경 내용**:
+기존 스크립트는 `GOARCH=amd64/arm64` 크로스컴파일을 시도했으나, CGo 포함 코드는 Apple Silicon에서 amd64 크로스컴파일이 실패. 이후 todo-008에서 Xcode clang이 크로스컴파일을 지원함을 확인하여 Universal Binary로 전환.
+
+빌드 결과:
+```
+dist/
+├── WinResizer.app/
+│   └── Contents/
+│       ├── Info.plist
+│       ├── MacOS/WinResizer   ← Universal Binary (arm64 + x86_64)
+│       └── Resources/
+└── WinResizer.dmg
+```
+
+`dist/`는 `.gitignore`에 포함되어 버전 관리 대상 제외.
+
+**커밋**: `0bc7865` (단독 빌드), `dd2c211` (Universal Binary로 교체)

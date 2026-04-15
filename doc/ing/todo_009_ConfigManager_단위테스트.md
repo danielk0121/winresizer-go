@@ -33,3 +33,28 @@ go test ./app/core/ -run TestSave -v
 
 ## 참고 문서
 - `doc/done/spec_테스트계획.md`
+
+## 작업 결과
+
+**상태**: 완료
+
+**생성 파일**: `app/core/config_manager_test.go`
+**수정 파일**: `app/core/config_manager.go`
+
+**테스트 구현**:
+`setupConfigTest()` 헬퍼로 `configFilePath`와 `defaultConfigPathFn`을 임시 경로로 교체하여 실제 사용자 설정 파일에 영향 없이 독립 테스트 실행.
+
+| 테스트 | 결과 |
+|--------|------|
+| TestLoadDefaultConfig | PASS |
+| TestLoadConfig_NoUserConfig | PASS |
+| TestLoadConfig_WithUserConfig | PASS |
+| TestSaveConfig | PASS |
+| TestSaveRuntimeInfo | PASS |
+| TestInvalidateCache | PASS |
+| TestLoadConfig_CorruptFile | PASS |
+
+**버그 수정 (부산물)**:
+`LoadConfig()`에서 `cacheMu.Lock()` 보유 중 `SaveConfig()` 호출 시 `SaveConfig()`도 `cacheMu.Lock()`을 시도해 데드락 발생. `saveConfigFile()` 내부 함수를 분리하여 해결.
+
+**커밋**: `886a477`

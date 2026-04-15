@@ -29,3 +29,25 @@ TODO-003 스마트 사이클 구현 후 `IsNearlyEqual` 판별 로직 및 사이
 go test ./app/core/ -run TestIsNearlyEqual -v
 go test ./app/core/ -run TestNextCycleMode -v
 ```
+
+## 작업 결과
+
+**상태**: 완료
+
+**수정 파일**: `app/core/window_controller_test.go`
+
+**변경 내용**:
+`TestNextCycleMode_*` 3개는 todo-003에서 이미 추가됨. 이번에 `IsSimilar` 직접 단위테스트 3개 추가.
+
+| 테스트 | 결과 |
+|--------|------|
+| TestIsSimilar_ExactMatch | PASS |
+| TestIsSimilar_WithinTolerance | PASS |
+| TestIsSimilar_OutOfTolerance | PASS |
+| TestNextCycleMode_LeftCycle | PASS (기존) |
+| TestNextCycleMode_RightCycle | PASS (기존) |
+| TestNextCycleMode_NoCycle | PASS (기존) |
+
+core 패키지 전체 테스트 23개 모두 통과.
+
+**커밋**: `bcc24fc`

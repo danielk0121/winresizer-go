@@ -33,3 +33,26 @@ lipo -create dist/winresizer_arm64 dist/winresizer_amd64 \
 lipo -info WinResizer.app/Contents/MacOS/winresizer
 # 출력: Architectures in the fat file: arm64 x86_64
 ```
+
+## 작업 결과
+
+**상태**: 완료
+
+**수정 파일**: `app/build/build.sh`
+
+**변경 내용**:
+`osxcross` 없이도 Xcode clang(14.0.0)이 Apple Silicon에서 amd64 크로스컴파일을 지원함을 확인. `GOARCH=amd64 CGO_ENABLED=1 go build` 성공.
+
+```bash
+GOARCH=arm64 CGO_ENABLED=1 go build -o dist/winresizer_arm64 .
+GOARCH=amd64 CGO_ENABLED=1 go build -o dist/winresizer_amd64 .
+lipo -create dist/winresizer_arm64 dist/winresizer_amd64 -output "${MACOS_DIR}/${APP_NAME}"
+rm dist/winresizer_arm64 dist/winresizer_amd64
+```
+
+**검증 결과**:
+```
+Architectures in the fat file: .../WinResizer are: x86_64 arm64
+```
+
+**커밋**: `dd2c211`
