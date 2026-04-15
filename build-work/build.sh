@@ -27,6 +27,11 @@ if [ -f "${APP_DIR}/ui/icon.icns" ]; then
     cp "${APP_DIR}/ui/icon.icns" "${RESOURCES_DIR}/icon.icns"
 fi
 
+echo "==> Code signing (ad-hoc)"
+codesign --force --deep --sign - \
+    --entitlements "${SCRIPT_DIR}/entitlements.plist" \
+    "${BUNDLE_DIR}"
+
 echo "==> Creating DMG"
 # 드래그 설치용 임시 폴더 구성
 mkdir -p "${SCRIPT_DIR}/dist/dmg"
