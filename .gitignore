@@ -22,10 +22,15 @@ go.work.sum
 bin/
 dist/
 build-work/dist/
+build-work/temp/
 
 # OS files
 .DS_Store
 Thumbs.db
+
+# Node.js
+node_modules/
+package-lock.json
 
 # IDE
 .idea/
