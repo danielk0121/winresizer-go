@@ -1,0 +1,100 @@
+{
+    "settings": {
+        "gap": 2,
+        "login_launch": true,
+        "ignore_apps": [],
+        "auto_layouts": {}
+    },
+    "shortcuts": {
+        "Left": {
+            "display": "alt + cmd + shift + left",
+            "mode": "left_half",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Right": {
+            "display": "alt + cmd + shift + right",
+            "mode": "right_half",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Top": {
+            "display": "alt + cmd + shift + up",
+            "mode": "top_half",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Bottom": {
+            "display": "alt + cmd + shift + down",
+            "mode": "bottom_half",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Maximize": {
+            "display": "",
+            "mode": "maximize",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Restore": {
+            "display": "",
+            "mode": "restore",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Left 1/3": {
+            "display": "",
+            "mode": "left_1/3",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Center 1/3": {
+            "display": "",
+            "mode": "center_1/3",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Right 1/3": {
+            "display": "",
+            "mode": "right_1/3",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Left 2/3": {
+            "display": "",
+            "mode": "left_2/3",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Right 2/3": {
+            "display": "",
+            "mode": "right_2/3",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Top Left 1/4": {
+            "display": "",
+            "mode": "top_left_1/4",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Top Right 1/4": {
+            "display": "",
+            "mode": "top_right_1/4",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Bottom Left 1/4": {
+            "display": "",
+            "mode": "bottom_left_1/4",
+            "keycode": 0,
+            "modifiers": 0
+        },
+        "Bottom Right 1/4": {
+            "display": "",
+            "mode": "bottom_right_1/4",
+            "keycode": 0,
+            "modifiers": 0
+        }
+    }
+}

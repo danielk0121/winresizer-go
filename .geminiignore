@@ -1,0 +1,11 @@
+app/venv/
+__pycache__/
+.pytest_cache/
+app/.pytest_cache/
+ref/
+build/
+dist/
+doc/done/
+
+# dev debug
+shell_debug.file
