@@ -7,28 +7,28 @@
     },
     "shortcuts": {
         "Left": {
-            "display": "alt + cmd + shift + left",
+            "display": "ctrl + opt + cmd + left",
             "mode": "left_half",
-            "keycode": 0,
-            "modifiers": 0
+            "keycode": 123,
+            "modifiers": 6400
         },
         "Right": {
-            "display": "alt + cmd + shift + right",
+            "display": "ctrl + opt + cmd + right",
             "mode": "right_half",
-            "keycode": 0,
-            "modifiers": 0
+            "keycode": 124,
+            "modifiers": 6400
         },
         "Top": {
-            "display": "alt + cmd + shift + up",
+            "display": "ctrl + opt + cmd + up",
             "mode": "top_half",
-            "keycode": 0,
-            "modifiers": 0
+            "keycode": 126,
+            "modifiers": 6400
         },
         "Bottom": {
-            "display": "alt + cmd + shift + down",
+            "display": "ctrl + opt + cmd + down",
             "mode": "bottom_half",
-            "keycode": 0,
-            "modifiers": 0
+            "keycode": 125,
+            "modifiers": 6400
         },
         "Maximize": {
             "display": "",
