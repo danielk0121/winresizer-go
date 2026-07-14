@@ -1,1 +1,811 @@
-윈리사이저 홈페이지
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>윈리사이저 - macOS를 위한 가볍고 강력한 창 관리자</title>
+
+    <!-- Search Engine & SEO Meta Tags -->
+    <meta name="description" content="윈리사이저(WinResizer)는 macOS에서 글로벌 단축키로 창의 크기와 위치를 스마트하게 조절할 수 있는 가볍고 빠른 오픈소스 트레이 앱입니다. Go 언어 기반 단단한 네이티브 성능을 제공합니다.">
+    <meta name="keywords" content="윈리사이저, WinResizer, macOS window manager, 맥 창 분할, 맥 단축키 창 조절, 맥 화면 분할, 오픈소스, Go 언어, 맥 창 관리">
+    <meta name="author" content="danielk0121">
+    <link rel="canonical" href="https://danielk0121.github.io/winresizer-go/homepage/index.html">
+
+    <!-- SNS Open Graph (OG) Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="윈리사이저 (WinResizer) - macOS 창 크기/위치 조절 트레이 앱">
+    <meta property="og:description" content="글로벌 단축키, 스마트 사이클링, 사이즈 리사이클, 멀티모니터 지원까지! 더 가볍고 단순해진 macOS 창 관리자, 윈리사이저를 만나보세요.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/danielk0121/winresizer-go/main/ref/img_7.png">
+    <meta property="og:url" content="https://danielk0121.github.io/winresizer-go/homepage/index.html">
+    <meta property="og:site_name" content="윈리사이저">
+
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="윈리사이저 (WinResizer) - macOS 창 크기/위치 조절 트레이 앱">
+    <meta name="twitter:description" content="배포 단순화 및 성능 개선을 달성한 네이티브 macOS 단축키 창 관리 앱, 윈리사이저.">
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/danielk0121/winresizer-go/main/ref/img_7.png">
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #007aff;
+            --primary-dark: #0056b3;
+            --bg-color: #f5f5f7;
+            --card-bg: #ffffff;
+            --text-main: #1d1d1f;
+            --text-secondary: #86868b;
+            --border-color: #e5e5ea;
+            --terminal-bg: #1e1e1e;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #000000;
+                --card-bg: #1c1c1e;
+                --text-main: #f5f5f7;
+                --text-secondary: #86868b;
+                --border-color: #2c2c2e;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Navigation Bar */
+        nav {
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-decoration: none;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            color: var(--primary-color);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: color 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-main);
+        }
+
+        /* Language Switcher */
+        .lang-switcher {
+            display: inline-flex;
+            background-color: var(--border-color);
+            padding: 3px;
+            border-radius: 20px;
+        }
+
+        .lang-btn {
+            background: none;
+            border: none;
+            padding: 4px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 15px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+        }
+
+        .lang-btn.active {
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Hero Section */
+        header.hero {
+            padding: 80px 0 60px 0;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            line-height: 1.15;
+            margin-bottom: 20px;
+        }
+
+        h1 span {
+            background: linear-gradient(135deg, #007aff, #00c6ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.35rem;
+            color: var(--text-secondary);
+            max-width: 750px;
+            margin: 0 auto 40px auto;
+            font-weight: 400;
+            word-break: keep-all;
+        }
+
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 50px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+            transform: translateY(-2px);
+        }
+
+        /* Screenshot Container */
+        .screenshot-container {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            margin-bottom: 80px;
+            overflow: hidden;
+        }
+
+        .screenshot-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            display: block;
+        }
+
+        /* Core Features Grid */
+        .section-title {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 50px;
+            font-size: 1.1rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 80px;
+        }
+
+        .feature-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Hotkey Table Section */
+        .hotkey-section {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 80px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            font-weight: 700;
+            color: var(--text-main);
+            background-color: rgba(0,0,0,0.02);
+        }
+
+        td kbd {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 4px 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 0 var(--border-color);
+            color: var(--text-main);
+        }
+
+        /* Quick Guide & Terminal */
+        .guide-section {
+            margin-bottom: 80px;
+        }
+
+        .terminal-window {
+            background-color: var(--terminal-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            margin-top: 25px;
+        }
+
+        .terminal-header {
+            background-color: #2d2d2d;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-red { background-color: #ff5f56; }
+        .dot-yellow { background-color: #ffbd2e; }
+        .dot-green { background-color: #27c93f; }
+
+        .terminal-body {
+            padding: 20px;
+            color: #f8f8f2;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+
+        .terminal-body pre {
+            white-space: pre-wrap;
+        }
+
+        .terminal-comment {
+            color: #75715e;
+        }
+
+        .terminal-command {
+            color: #a6e22e;
+        }
+
+        /* Permission Guard Section */
+        .permission-section {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 80px;
+        }
+
+        .steps-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .steps-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .step-card {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 20px;
+        }
+
+        .step-card h4 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .step-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 40px 0;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-socials {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .footer-socials a {
+            color: var(--text-secondary);
+        }
+
+        .footer-socials a:hover {
+            color: var(--text-main);
+        }
+
+        /* CSS-based Multilingual support */
+        [lang="en"] .ko-only { display: none !important; }
+        [lang="ko"] .en-only { display: none !important; }
+    </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<div class="container">
+    <nav>
+        <a href="#" class="logo">
+            <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+            <span class="ko-only">윈리사이저</span>
+            <span class="en-only">WinResizer</span>
+        </a>
+        <div class="nav-right">
+            <div class="nav-links">
+                <a href="#features">
+                    <span class="ko-only">주요 특징</span>
+                    <span class="en-only">Features</span>
+                </a>
+                <a href="#hotkeys">
+                    <span class="ko-only">기본 단축키</span>
+                    <span class="en-only">Hotkeys</span>
+                </a>
+                <a href="#quickstart">
+                    <span class="ko-only">설치 가이드</span>
+                    <span class="en-only">Quick Start</span>
+                </a>
+            </div>
+
+            <!-- Language Switch Toggle -->
+            <div class="lang-switcher">
+                <button onclick="setLanguage('ko')" id="btn-ko" class="lang-btn active">KO</button>
+                <button onclick="setLanguage('en')" id="btn-en" class="lang-btn">EN</button>
+            </div>
+
+            <a href="https://github.com/danielk0121/winresizer-go" target="_blank" style="color: var(--text-secondary); font-size: 1.2rem;"><i class="fa-brands fa-github"></i></a>
+        </div>
+    </nav>
+</div>
+
+<!-- Hero Section -->
+<header class="hero">
+    <div class="container">
+        <h1>
+            <span class="ko-only">macOS 화면 분할을 손쉽게,<br><span>윈리사이저</span></span>
+            <span class="en-only">Effortless Window Snapping,<br><span>WinResizer</span></span>
+        </h1>
+        <p class="subtitle">
+            <span class="ko-only">윈리사이저는 macOS 창의 크기와 위치를 글로벌 단축키로 조절하는 가볍고 강력한 트레이 앱입니다. 극강의 응답성과 단일 바이너리 배포 단순화를 달성했습니다.</span>
+            <span class="en-only">WinResizer is a lightweight and powerful menu bar application that lets you snap and organize windows on macOS via global hotkeys. Built for peak responsiveness and simple deployment.</span>
+        </p>
+
+        <div class="hero-buttons">
+            <a href="https://github.com/danielk0121/winresizer-go/releases" target="_blank" class="btn btn-primary">
+                <i class="fa-solid fa-download"></i>
+                <span class="ko-only">최신 릴리즈 다운로드 (.dmg)</span>
+                <span class="en-only">Download Latest DMG</span>
+            </a>
+            <a href="https://github.com/danielk0121/winresizer-go" target="_blank" class="btn btn-secondary">
+                <i class="fa-brands fa-github"></i>
+                <span class="ko-only">GitHub 저장소 방문</span>
+                <span class="en-only">View on GitHub</span>
+            </a>
+        </div>
+
+        <!-- Screenshot -->
+        <div class="screenshot-container">
+            <img src="https://raw.githubusercontent.com/danielk0121/winresizer-go/main/ref/img_7.png" alt="윈리사이저 앱 스크린샷" onerror="this.src='https://raw.githubusercontent.com/danielk0121/winresizer-go/main/e2e_screenshots/ui_main.png';">
+        </div>
+    </div>
+</header>
+
+<!-- Features Section -->
+<section id="features" class="container">
+    <h2 class="section-title">
+        <span class="ko-only">주요 특징</span>
+        <span class="en-only">Core Features</span>
+    </h2>
+    <p class="section-subtitle">
+        <span class="ko-only">가볍고 신속한 네이티브 동작을 한 번에 경험하세요.</span>
+        <span class="en-only">Experience fast, seamless native performance with no extra footprint.</span>
+    </p>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-keyboard"></i></div>
+            <h3>
+                <span class="ko-only">글로벌 단축키 조절</span>
+                <span class="en-only">Global Hotkeys</span>
+            </h3>
+            <p>
+                <span class="ko-only">단축키 하나로 활성화된 창을 즉시 화면의 절반, 1/3, 2/3, 사분면 등으로 칼같이 배치합니다.</span>
+                <span class="en-only">Instantly snap active windows to half, 1/3, 2/3, or corner quadrants with straightforward shortcuts.</span>
+            </p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-arrows-spin"></i></div>
+            <h3>
+                <span class="ko-only">스마트 사이클링</span>
+                <span class="en-only">Smart Cycling</span>
+            </h3>
+            <p>
+                <span class="ko-only">동일한 단축키를 연속해서 누르면 미리 정의된 화면 분할 비율로 즉시 순환 조절됩니다. (예: 1/2 → 2/3 → 1/3)</span>
+                <span class="en-only">Pressing the same hotkey consecutively cycles the window size through predefined ratios (e.g., 1/2 → 2/3 → 1/3).</span>
+            </p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-arrows-left-right-to-line"></i></div>
+            <h3>
+                <span class="ko-only">사이즈 리사이클</span>
+                <span class="en-only">Size Recycling</span>
+            </h3>
+            <p>
+                <span class="ko-only">단축키 반복 입력 시 창 폭을 10%씩 증감 조절하며, 20%에서 90% 한계를 넘으면 랩어라운드로 순환 조절을 지속합니다.</span>
+                <span class="en-only">Repeated presses expand or shrink window widths by 10%, wrapping around smoothly between 20% and 90% boundaries.</span>
+            </p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-sliders"></i></div>
+            <h3>
+                <span class="ko-only">커스텀 비율 조절</span>
+                <span class="en-only">Custom Ratios</span>
+            </h3>
+            <p>
+                <span class="ko-only">웹 기반 설정 UI에서 상/하/좌/우 방향별 원하는 비율(1% ~ 100%)을 직접 섬세하게 지정하여 커스텀 단축키를 등록할 수 있습니다.</span>
+                <span class="en-only">Fine-tune width/height percentages (1% - 100%) for custom edges and bind your own shortcuts in the sleek web-based settings UI.</span>
+            </p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-desktop"></i></div>
+            <h3>
+                <span class="ko-only">멀티모니터 완전 지원</span>
+                <span class="en-only">Multi-Monitor Support</span>
+            </h3>
+            <p>
+                <span class="ko-only">창이 현재 속해있는 모니터를 자동으로 똑똑하게 스캔하여, 해당 디스플레이 영역을 기준으로 정확하게 동작합니다.</span>
+                <span class="en-only">Automatically identifies which monitor the target window resides on and positions it precisely based on that display.</span>
+            </p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fa-solid fa-cubes"></i></div>
+            <h3>
+                <span class="ko-only">단일 바이너리 가벼움</span>
+                <span class="en-only">Single Binary Efficiency</span>
+            </h3>
+            <p>
+                <span class="ko-only">CGo를 통해 macOS 네이티브 API(Carbon, Accessibility)를 다이렉트로 호출하며, 다른 런타임 없이 15-25MB 수준의 가볍고 민첩한 네이티브 프로세스로 동작합니다.</span>
+                <span class="en-only">Directly calls native macOS APIs (Carbon, Accessibility) via CGo. Operates as a highly optimized, single binary (15-25 MB) with no heavy runtime.</span>
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Hotkey Section -->
+<section id="hotkeys" class="container">
+    <div class="hotkey-section">
+        <h2 class="section-title">
+            <span class="ko-only">기본 단축키 설정</span>
+            <span class="en-only">Default Hotkey Mappings</span>
+        </h2>
+        <p class="section-subtitle" style="margin-bottom: 20px;">
+            <span class="ko-only">설치 즉시 사용해볼 수 있는 직관적인 기본 단축키 세트입니다.</span>
+            <span class="en-only">A set of clean, intuitive global hotkeys pre-configured out of the box.</span>
+        </p>
+
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                <tr>
+                    <th>
+                        <span class="ko-only">기능</span>
+                        <span class="en-only">Action</span>
+                    </th>
+                    <th>
+                        <span class="ko-only">기본 단축키</span>
+                        <span class="en-only">Default Hotkey</span>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <span class="ko-only">상단 1/2 분할</span>
+                        <span class="en-only">Top Half</span>
+                    </td>
+                    <td><kbd>ctrl</kbd> + <kbd>opt</kbd> + <kbd>↑</kbd></td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="ko-only">하단 1/2 분할</span>
+                        <span class="en-only">Bottom Half</span>
+                    </td>
+                    <td><kbd>ctrl</kbd> + <kbd>opt</kbd> + <kbd>↓</kbd></td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="ko-only">좌측 확장 (+10%)</span>
+                        <span class="en-only">Expand Left (+10%)</span>
+                    </td>
+                    <td><kbd>ctrl</kbd> + <kbd>opt</kbd> + <kbd>←</kbd></td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="ko-only">좌측 축소 (-10%)</span>
+                        <span class="en-only">Shrink Left (-10%)</span>
+                    </td>
+                    <td><kbd>ctrl</kbd> + <kbd>opt</kbd> + <kbd>shift</kbd> + <kbd>←</kbd></td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="ko-only">우측 확장 (+10%)</span>
+                        <span class="en-only">Expand Right (+10%)</span>
+                    </td>
+                    <td><kbd>ctrl</kbd> + <kbd>opt</kbd> + <kbd>→</kbd></td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="ko-only">우측 축소 (-10%)</span>
+                        <span class="en-only">Shrink Right (-10%)</span>
+                    </td>
+                    <td><kbd>ctrl</kbd> + <kbd>opt</kbd> + <kbd>shift</kbd> + <kbd>→</kbd></td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="ko-only">커스텀 좌/우/상/하 비율 조절</span>
+                        <span class="en-only">Custom Left/Right/Top/Bottom Ratio</span>
+                    </td>
+                    <td>
+                        <span class="ko-only">기본값 60% ~ 70% (설정 UI에서 추가 단축키 설정 가능)</span>
+                        <span class="en-only">Default 60% - 70% (Unbound by default, configure in UI)</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Quickstart / Build Guide -->
+<section id="quickstart" class="container guide-section">
+    <h2 class="section-title">
+        <span class="ko-only">빠른 시작 (Quick Start)</span>
+        <span class="en-only">Quick Build & Start</span>
+    </h2>
+    <p class="section-subtitle">
+        <span class="ko-only">터미널에서 직접 빌드하고 실행하거나 릴리즈 페이지에서 편리하게 받아보세요.</span>
+        <span class="en-only">Build and run the app manually using terminal or grab the pre-compiled DMG.</span>
+    </p>
+
+    <div class="terminal-window">
+        <div class="terminal-header">
+            <span class="terminal-dot dot-red"></span>
+            <span class="terminal-dot dot-yellow"></span>
+            <span class="terminal-dot dot-green"></span>
+        </div>
+        <div class="terminal-body">
+            <pre><span class="terminal-comment"><span class="ko-only"># 1. 소스코드 복사</span><span class="en-only"># 1. Clone the repository</span></span>
+<span class="terminal-command">git clone https://github.com/danielk0121/winresizer-go.git</span>
+<span class="terminal-command">cd winresizer-go/app</span>
+
+<span class="terminal-comment"><span class="ko-only"># 2. 의존성 설치 및 빌드</span><span class="en-only"># 2. Install dependencies & build</span></span>
+<span class="terminal-command">go build -o winresizer .</span>
+
+<span class="terminal-comment"><span class="ko-only"># 3. 실행</span><span class="en-only"># 3. Run</span></span>
+<span class="terminal-command">./winresizer</span></pre>
+        </div>
+    </div>
+</section>
+
+<!-- Permissions Guide -->
+<section class="container">
+    <div class="permission-section">
+        <h2 class="section-title">
+            <span class="ko-only">필수 권한 설정 (macOS 2단계)</span>
+            <span class="en-only">Required Permissions (macOS 2-Step)</span>
+        </h2>
+        <p class="section-subtitle" style="margin-bottom: 20px;">
+            <span class="ko-only">타사 앱 제어 및 시스템 단축키 입력을 조작하기 위해 최초 실행 시 아래 두 가지 손쉬운 권한 허용이 필요합니다.</span>
+            <span class="en-only">To seamlessly listen to keyboard shortcuts and position application windows, granting these two system-level permissions is required.</span>
+        </p>
+
+        <div class="steps-container">
+            <div class="step-card">
+                <h4>
+                    <span class="ko-only">1단계: 손쉬운 사용 (Accessibility)</span>
+                    <span class="en-only">Step 1: Accessibility</span>
+                </h4>
+                <p>
+                    <span class="ko-only">활성화된 다른 앱들의 창 좌표와 크기를 제어하기 위해 권한 승인이 요구됩니다.<br><strong>경로:</strong> 시스템 설정 > 개인정보 보호 및 보안 > 손쉬운 사용 > <code>winresizer</code> 허용</span>
+                    <span class="en-only">Allows WinResizer to adjust window coordinate values. <br><strong>Path:</strong> System Settings > Privacy & Security > Accessibility > Allow <code>winresizer</code></span>
+                </p>
+            </div>
+            <div class="step-card">
+                <h4>
+                    <span class="ko-only">2단계: 입력 모니터링 (Input Monitoring)</span>
+                    <span class="en-only">Step 2: Input Monitoring</span>
+                </h4>
+                <p>
+                    <span class="ko-only">앱이 백그라운드에 위치해도 글로벌 지정 단축키를 놓치지 않고 감지하기 위해 요구됩니다.<br><strong>경로:</strong> 시스템 설정 > 개인정보 보호 및 보안 > 입력 모니터링 > <code>winresizer</code> 허용</span>
+                    <span class="en-only">Allows background detection of your configured global hotkeys. <br><strong>Path:</strong> System Settings > Privacy & Security > Input Monitoring > Allow <code>winresizer</code></span>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="footer-socials">
+            <a href="https://github.com/danielk0121/winresizer-go" target="_blank" title="GitHub"><i class="fa-brands fa-github"></i></a>
+        </div>
+        <p>&copy; 2026 윈리사이저 (WinResizer). Built by <a href="https://github.com/danielk0121" target="_blank">danielk0121</a>.</p>
+    </div>
+</footer>
+
+<script>
+    // Robust local preference tracking & CSS-driven language switching
+    function setLanguage(lang) {
+        document.documentElement.setAttribute('lang', lang);
+        localStorage.setItem('preferred-lang', lang);
+
+        // Update active class on buttons
+        const btnKo = document.getElementById('btn-ko');
+        const btnEn = document.getElementById('btn-en');
+        if (lang === 'ko') {
+            btnKo.classList.add('active');
+            btnEn.classList.remove('active');
+            document.title = "윈리사이저 - macOS를 위한 가볍고 강력한 창 관리자";
+        } else {
+            btnEn.classList.add('active');
+            btnKo.classList.remove('active');
+            document.title = "WinResizer - Lightweight & Powerful Window Manager for macOS";
+        }
+    }
+
+    // On Load: Autodetect or load cached preference
+    window.addEventListener('DOMContentLoaded', () => {
+        const cachedLang = localStorage.getItem('preferred-lang');
+        if (cachedLang === 'ko' || cachedLang === 'en') {
+            setLanguage(cachedLang);
+        } else {
+            // Check browser preferred languages
+            const userLang = navigator.language || navigator.userLanguage;
+            if (userLang.startsWith('ko')) {
+                setLanguage('ko');
+            } else {
+                setLanguage('en');
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
