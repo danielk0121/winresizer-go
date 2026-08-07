@@ -1,5 +1,9 @@
 # winresizer-go
 
+
+[웹사이트 바로가기](https://danielk0121.github.io/winresizer-go/homepage/)
+
+
 macOS 창 크기/위치를 글로벌 단축키로 조절하는 트레이 앱. Python 구현체를 Go로 포팅하여 배포 단순화 및 성능 개선을 목표로 합니다.
 
 ## 주요 특징
